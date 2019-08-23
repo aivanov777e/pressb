@@ -1,4 +1,4 @@
-const OrderService = require('../services/order.service').default.default.default;
+const OrderService = require('../services/order.service');
     
     class OrderController {
      getOrder(req, res){

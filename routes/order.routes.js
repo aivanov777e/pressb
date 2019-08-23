@@ -1,7 +1,7 @@
 const express = require("express"),
     router = express.Router(),
     OrderController = require('../controllers/order.controller'),
-    OrderService = require('../services/order.service').default.default.default;
+    OrderService = require('../services/order.service');
 
 router.use(async (req, res, next) => {
 let data = await OrderService.getOrder();

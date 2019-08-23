@@ -1,24 +1,30 @@
 const fs = require('fs');
 const Sequelize = require('sequelize');
 const sequelize = require('./db.service');
+const division = require('./division.service');
+const contact = require('./contact.service');
 
 // Создаём описание таблички
 let order = sequelize.define('order', {
     id: {
+      primaryKey: true,
       allowNull: false,
       type: Sequelize.DataTypes.UUID,
       defadefaultValue: Sequelize.UUIDV1
     },
-    title: {
-      type: Sequelize.DataTypes.STRING,
-      allowNull: false
-    },
-    body: {
-      type: Sequelize.DataTypes.STRING
-    }
-  }, {
-    timestamps: true // Колонки createdAt и updatedAt будут созданы автоматически
-  });
+    reg_date: Sequelize.DATE,
+    name: Sequelize.STRING,
+    number: Sequelize.STRING,
+}, {});
+
+sequelize.models.division.hasMany(order);
+sequelize.models.division.hasMany(order, {foreignKey: 'subdivisionId', sourceKey: 'id'});
+sequelize.models.contact.hasMany(order);
+
+order.sync({ force: true }).then(result=>{
+  console.log(result);  
+})
+.catch(err=> console.log(err));  
 
 class OrderService{
  getOrder(){

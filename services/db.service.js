@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('db_name', 'user', 'password', {
+const sequelize = new Sequelize('press', 'postgres', ',bkfqy1', {
     dialect: 'postgres',
     pool: {
       max: 10, //максимальное кол-во соединений в пуле (Default: 5)
