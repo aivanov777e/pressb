@@ -9,7 +9,7 @@ let division = sequelize.define('division', {
         primaryKey: true,
         allowNull: false,
         type: Sequelize.UUID,
-        defadefaultValue: Sequelize.UUIDV1
+        defaultValue: Sequelize.UUIDV1
     },
     name: {
       type: Sequelize.STRING,
@@ -27,13 +27,18 @@ division.hasMany(division);
 //     // });
 // });
 
-division.sync().then(result=>{
-    console.log(result);
+division.sync({ force: true }).then(result=>{
+  console.log(result);
+
+  let newI = {
+    name: 'Тест division',
+  }
+  let newDBRecord = sequelize.models.division.create(newI);
   })
   .catch(err=> console.log(err));  
 
 class DivisionService{
-    getDivision(query){
+    async getDivision(query){
       return await sequelize.models.division.findAll();
     }
    

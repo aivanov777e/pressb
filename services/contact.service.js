@@ -8,7 +8,7 @@ let contact = sequelize.define('contact', {
     primaryKey: true,
     allowNull: false,
     type: Sequelize.UUID,
-    defadefaultValue: Sequelize.UUIDV1
+    defaultValue: Sequelize.UUIDV1
   },
   name: {
     type: Sequelize.STRING,

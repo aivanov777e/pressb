@@ -7,12 +7,12 @@ const contact = require('./contact.service');
 // Создаём описание таблички
 let order = sequelize.define('order', {
     id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.UUIDV1,
       primaryKey: true,
-      allowNull: false,
-      type: Sequelize.DataTypes.UUID,
-      defadefaultValue: Sequelize.UUIDV1
+      //allowNull: false,
     },
-    reg_date: Sequelize.DATE,
+    regDate: Sequelize.DATE,
     name: Sequelize.STRING,
     number: Sequelize.STRING,
 }, {});
@@ -23,7 +23,14 @@ sequelize.models.contact.hasMany(order);
 
 order.sync({ force: true }).then(result=>{
   console.log(result);  
-})
+
+  let newOrder = {
+    regDate: Date.now(),
+    name: 'Тест order',
+    number: '123'
+  }
+  let newDBRecord = sequelize.models.order.create(newOrder);
+  })
 .catch(err=> console.log(err));  
 
 class OrderService{

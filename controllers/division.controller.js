@@ -1,9 +1,13 @@
 const DivisionService = require('../services/division.service');
+const sequelize = require('../services/db.service');
     
 class DivisionController {
     async getDivision(req, res){
-        let result = await DivisionService.getDivision(req.query);
-        return res.status(200).send({data: result});
+        console.log('getDivision');
+        let data = await sequelize.models.division.findAll();
+        return res.status(200).send(data);
+        // let result = await DivisionService.getDivision(req.query);
+        // return res.status(200).send({data: result});
     }
 
     async createDivision(req, res){

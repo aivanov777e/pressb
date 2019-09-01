@@ -4,19 +4,24 @@ const express = require("express"),
     OrderService = require('../services/order.service');
 
 router.use(async (req, res, next) => {
-let data = await OrderService.getOrder();
-
-if(data){
-  req.order = data;
+  console.log('order.routes.js');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'origin, content-type, accept');
   next();
-}else
-  return res.status(500).send({message: 'Error while getting order'});
+// let data = await OrderService.getOrder();
+
+// if(data){
+//   req.order = data;
+//   next();
+// }else
+//   return res.status(500).send({message: 'Error while getting order'});
+// 
 });
 
-router.route('/')
-.get(OrderController.getOrder)
-.post(OrderController.createOrder)
-.put(OrderController.updateOrder)
-.delete(OrderController.deleteOrder);
+router.route('')
+.get(OrderController.getOrder);
+// .post(OrderController.createOrder)
+// .put(OrderController.updateOrder)
+// .delete(OrderController.deleteOrder);
 
 module.exports = router;
