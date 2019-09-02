@@ -1,10 +1,12 @@
-const DivisionService = require('../services/division.service');
+const Sequelize = require('sequelize');
 const sequelize = require('../services/db.service');
+// const DivisionService = require('../services/division.service');
     
 class DivisionController {
     async getDivision(req, res){
         console.log('getDivision');
-        let data = await sequelize.models.division.findAll();
+        let wh = req.query.mask ? {name: {[Sequelize.Op.like]: '%' + req.query.mask + '%'}} : {}
+        let data = await sequelize.models.division.findAll({where: wh});
         return res.status(200).send(data);
         // let result = await DivisionService.getDivision(req.query);
         // return res.status(200).send({data: result});

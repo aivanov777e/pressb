@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
 
+console.log('db.service')
+
 const sequelize = new Sequelize('press', 'postgres', ',bkfqy1', {
     dialect: 'postgres',
     pool: {
@@ -20,3 +22,5 @@ sequelize.authenticate()
     .catch(err => console.error('Connection postgres error: ', err));
     
 module.exports = sequelize;
+
+require('../services/db.service.models');

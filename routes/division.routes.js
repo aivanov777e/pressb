@@ -1,7 +1,7 @@
 const express = require("express"),
     router = express.Router(),
-    DivisionController = require('../controllers/division.controller'),
-    DivisionService = require('../services/division.service');
+    divisionController = require('../controllers/division.controller')
+    //DivisionService = require('../services/division.service');
 
 // router.use(async (req, res, next) => {
 // let data = await DivisionService.getDivision();
@@ -14,8 +14,8 @@ const express = require("express"),
 // });
 
 router.route('/')
-.get(DivisionController.getDivision)
-.post(DivisionController.createDivision)
+.get(divisionController.getDivision)
+.post(divisionController.createDivision)
 // .put(DivisionController.updateDivision)
 // .delete(DivisionController.deleteDivision);
 
