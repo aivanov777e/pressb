@@ -21,7 +21,7 @@ router.use(async (req, res, next) => {
 router.route('/')
 .get(orderController.getOrder)
 .post(orderController.createOrder)
-// .put(OrderController.updateOrder)
+.put(orderController.updateOrder)
 // .delete(OrderController.deleteOrder);
 
 module.exports = router;

@@ -4,7 +4,21 @@ const sequelize = require('../services/db.service');
 class OrderController {
   async getOrder(req, res){
   console.log('getOrder');
-  let data = await sequelize.models.order.findAll();
+  let data;
+  if (req.query.id) {
+    if (req.query.id === '-1') {
+      const dataLast = await sequelize.models.order.findOne({ order: [['regDate', 'DESC']], raw: true });
+      data = {number: +dataLast.number + 1}
+    } else {
+      data = await sequelize.models.order.findByPk(req.query.id, {include: [{ all: true, nested: false }]});
+    }
+  } else {
+    //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
+    data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: false }] });
+    console.log(data);
+    console.log(JSON.stringify(data))
+    //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
+  }
   return res.status(200).send(data);
 
 
@@ -23,7 +37,12 @@ class OrderController {
   async createOrder(req, res){
     console.log('createOrder');
     console.log(req);
-    let data = await sequelize.models.order.create(req.body);
+    if (!req.body.division.id) {
+      let division = await sequelize.models.division.create(req.body.division);
+      req.body.divisionId = division.id;
+    }
+    let newOrder = await sequelize.models.order.create(req.body);
+    let data = await sequelize.models.order.findByPk(newOrder.id, {include: [{ all: true, nested: false }]});
     return res.status(200).send(data);
   }
   //  async createOrder(req, res){
@@ -43,6 +62,19 @@ class OrderController {
   //      return res.status(400).send({message: 'Bad request.'});
   //  }
   
+  async updateOrder(req, res) {
+    console.log('updateOrder');
+    if (!req.body.divisionId) {
+      //let division = await sequelize.models.division.create(req.body.division);
+      //req.body.divisionId = division.id;
+      const [division, created] = await sequelize.models.division.findOrCreate({where: {name: req.body.division.name}, defaults: req.body.division});
+      console.log(division);
+      req.body.divisionId = division.id;
+    }
+    await sequelize.models.order.update(req.body, { where: { id: req.body.id } });
+    let data = await sequelize.models.order.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
+    return res.status(200).send(data);
+  }
   //  async updateOrder(req, res){
   //    if(req.body.order && req.body.order.id){
   //      if(!req.order.hasOwnProperty(req.body.order.id))
