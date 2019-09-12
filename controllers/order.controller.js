@@ -1,3 +1,4 @@
+const Sequelize = require('sequelize');
 const sequelize = require('../services/db.service');
 // const OrderService = require('../services/order.service');
     
@@ -41,6 +42,22 @@ class OrderController {
       let division = await sequelize.models.division.create(req.body.division);
       req.body.divisionId = division.id;
     }
+    if (!req.body.subdivisionId && req.body.subdivision && req.body.subdivision.name) {
+      const [subdivision, created] = await sequelize.models.subdivision.findOrCreate({where: {divisionId: req.body.divisionId, name: req.body.subdivision.name}, defaults: req.body.subdivision});
+      console.log(subdivision);
+      req.body.subdivisionId = subdivision.id;
+    }
+    if (!req.body.contactId) {
+      req.body.contact.divisionId = req.body.subdivisionId || req.body.divisionId;
+      //const [contact, created] = await sequelize.models.contact.findOrCreate({where: {divisionId: divisionId, name: req.body.contact.name}, defaults: req.body.contact});
+      const contact = await sequelize.models.contact.create(req.body.contact);
+      console.log(contact);
+      req.body.contactId = contact.id;
+    } else {
+      // Если надо обновим телефон
+      let up = await sequelize.models.contact.update({tel: req.body.contact.tel}, {where: {id: req.body.contactId, tel: {[Sequelize.Op.not]: req.body.tel}}});
+      console.log(up);
+    }
     let newOrder = await sequelize.models.order.create(req.body);
     let data = await sequelize.models.order.findByPk(newOrder.id, {include: [{ all: true, nested: false }]});
     return res.status(200).send(data);
@@ -70,6 +87,22 @@ class OrderController {
       const [division, created] = await sequelize.models.division.findOrCreate({where: {name: req.body.division.name}, defaults: req.body.division});
       console.log(division);
       req.body.divisionId = division.id;
+    }
+    if (!req.body.subdivisionId && req.body.subdivision && req.body.subdivision.name) {
+      const [subdivision, created] = await sequelize.models.subdivision.findOrCreate({where: {divisionId: req.body.divisionId, name: req.body.subdivision.name}, defaults: req.body.subdivision});
+      console.log(subdivision);
+      req.body.subdivisionId = subdivision.id;
+    }
+    if (!req.body.contactId) {
+      req.body.contact.divisionId = req.body.subdivisionId || req.body.divisionId;
+      //const [contact, created] = await sequelize.models.contact.findOrCreate({where: {divisionId: divisionId, name: req.body.contact.name}, defaults: req.body.contact});
+      const contact = await sequelize.models.contact.create(req.body.contact);
+      console.log(contact);
+      req.body.contactId = contact.id;
+    } else {
+      // Если надо обновим телефон
+      let up = await sequelize.models.contact.update({tel: req.body.contact.tel}, {where: {id: req.body.contactId, tel: {[Sequelize.Op.not]: req.body.contact.tel}}});
+      console.log(up);
     }
     await sequelize.models.order.update(req.body, { where: { id: req.body.id } });
     let data = await sequelize.models.order.findByPk(req.body.id, {include: [{ all: true, nested: false }]});

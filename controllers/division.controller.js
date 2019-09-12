@@ -5,8 +5,17 @@ const sequelize = require('../services/db.service');
 class DivisionController {
     async getDivision(req, res){
         console.log('getDivision');
-        let wh = req.query.mask ? {name: {[Sequelize.Op.like]: '%' + req.query.mask + '%'}} : {}
-        let data = await sequelize.models.division.findAll({where: wh});
+        let data;
+        if (!req.query.divisionId) {
+            let wh = req.query.mask ? {name: {[Sequelize.Op.like]: '%' + req.query.mask + '%'}} : {}
+            data = await sequelize.models.division.findAll({where: wh});
+        } else {
+            let wh = {divisionId: req.query.divisionId}
+            if (req.query.mask) {
+                wh.name = {[Sequelize.Op.like]: '%' + req.query.mask + '%'};
+            }
+            data = await sequelize.models.subdivision.findAll({where: wh});
+        }
         return res.status(200).send(data);
         // let result = await DivisionService.getDivision(req.query);
         // return res.status(200).send({data: result});

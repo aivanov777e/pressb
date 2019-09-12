@@ -12,7 +12,11 @@ let contact = sequelize.define('contact', {
     type: Sequelize.STRING,
     allowNull: false
   },
-  tel: Sequelize.STRING
+  tel: Sequelize.STRING,
+  divisionId: {
+    allowNull: false,
+    type: Sequelize.UUID,
+  },
 },{});
 
 let division = sequelize.define('division', {
@@ -62,13 +66,37 @@ order.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
 
 division.hasMany(subdivision);
 
-sequelize.sync({ force: true }).then(result=>{
-  console.log(result);  
+let printer = sequelize.define('printer', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  name: Sequelize.STRING,
+}, {});
 
-  createTestData();
+let format = sequelize.define('format', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  name: Sequelize.STRING,
+  width: Sequelize.NUMBER,
+  height: Sequelize.NUMBER,
+}, {});
 
-  })
-.catch(err=> console.log(err));  
+
+
+// sequelize.sync({ force: true }).then(result=>{
+//   console.log(result);  
+
+//   createTestData();
+
+//   })
+// .catch(err=> console.log(err));  
 
 async function createTestData() {
   let newDivision = {
@@ -83,4 +111,24 @@ async function createTestData() {
     divisionId: newDivisionRecord.id
   }
   let newOrderRecord = await sequelize.models.order.create(newOrder);
+
+  let newFormats = [
+    {name: 'А0', width: 1189, height: 841},
+    {name: 'А1', width: 841, height: 594},
+    {name: 'А2', width: 594, height: 420},
+    {name: 'А3', width: 420, height: 297},
+    {name: 'А4', width: 297, height: 210},
+    {name: 'А5', width: 210, height: 148},
+    {name: 'А6', width: 148, height: 105},
+    {name: 'А7', width: 105, height: 74},
+    {name: 'Рулон', width: 300},
+    {name: 'Рулон', width: 420},
+    {name: 'Рулон', width: 841},
+    {name: 'Рулон', width: 1000},
+    {name: 'Рулон', width: 1250},
+    {name: 'Рулон', width: 1360},
+    {name: 'Рулон', width: 1500},
+    {name: 'Рулон', width: 1600},
+  ]
+  await sequelize.models.format.bulkCreate(newFormats);
 }
