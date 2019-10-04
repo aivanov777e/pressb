@@ -3,6 +3,7 @@ router = express.Router(),
 orderRoutes = require("./order.routes");
 divisionRoutes = require("./division.routes");
 contactRoutes = require("./contact.routes");
+handbookRoutes = require("./handbook.routes");
 
 router.use(async (req, res, next) => {
   console.log('index.js');
@@ -15,5 +16,6 @@ router.use(async (req, res, next) => {
 router.use('/order', orderRoutes);
 router.use('/division', divisionRoutes);
 router.use('/contact', contactRoutes);
+router.use('/handbook', handbookRoutes);
 
 module.exports = router;
