@@ -2,7 +2,13 @@ const Sequelize = require('sequelize');
 
 console.log('db.service')
 
-const sequelize = new Sequelize('press', 'postgres', ',bkfqy1', {
+// const sequelize = new Sequelize('press', 'postgres', ',bkfqy1', {
+const config =  {
+    username: 'press_pg',
+    password: ',bkfqy1', // Для sqlite пароль не обязателен
+    database: 'press_pg', // Имя базы данных
+    host: '127.0.0.1', // Адрес субд, для sqlite всегда локалхост
+      
     dialect: 'postgres',
     pool: {
       max: 10, //максимальное кол-во соединений в пуле (Default: 5)
@@ -13,9 +19,13 @@ const sequelize = new Sequelize('press', 'postgres', ',bkfqy1', {
     define: {
         // The `timestamps` field specify whether or not the `createdAt` and `updatedAt` fields will be created.
         // This was true by default, but now is false by default
-        timestamps: false
-    }    
-});
+        timestamps: false,
+    },
+    // logging: console.log, // Включаем логи запросов, нужно передать именно функцию, либо false
+    // storage: './test_db.db', // Путь к файлу БД
+    operatorsAliases: Sequelize.Op // Передаём алиасы параметров (дальше покажу нафига)  
+};
+const sequelize = new Sequelize(config);
 
 sequelize.authenticate()
     .then(() => console.log('Connected postgres.'))

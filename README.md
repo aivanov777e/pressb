@@ -6,6 +6,10 @@ pg_ctl register -D "c:\pg_press" -N PostgreSQL -U postgres -P ",bkfqy1" -S a
 net start PostgreSQL
 createdb -U postgres press
 
+https://timeweb.com/ru/community/articles/kak-ustanovit-postgresql-na-ubuntu-18-04-1
+https://postgrespro.ru/docs/postgrespro/11/role-attributes
+sudo apt-get install postgresql
+
 
 --pg_ctl init -D c:\pgsql -o --locale=ru_RU
 
