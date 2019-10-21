@@ -9,6 +9,8 @@ createdb -U postgres press
 https://timeweb.com/ru/community/articles/kak-ustanovit-postgresql-na-ubuntu-18-04-1
 https://postgrespro.ru/docs/postgrespro/11/role-attributes
 sudo apt-get install postgresql
+CREATE ROLE press_pg PASSWORD ',bkfqy1' LOGIN SUPERUSER
+CREATE DATABASE press_pg
 
 
 --pg_ctl init -D c:\pgsql -o --locale=ru_RU

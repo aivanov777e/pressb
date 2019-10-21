@@ -8,4 +8,8 @@ router.route('/printer/')
 // .put(ContactController.updateContact)
 // .delete(ContactController.deleteContact);
 
+router.route('/format/').get(controller.getFormat)
+router.route('/color/').get(controller.getColor)
+router.route('/material/').get(controller.getMaterial)
+
 module.exports = router;

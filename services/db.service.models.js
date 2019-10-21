@@ -108,8 +108,8 @@ let order = sequelize.define('order', {
 
 division.hasMany(subdivision);
 
-printer.belongsToMany(format, {through: 'printerFormat', foreignKey: 'printerId'});
-format.belongsToMany(printer, {through: 'printerFormat', foreignKey: 'formatId'});
+printer.belongsToMany(format, {through: 'printerFormat'});//, foreignKey: 'printerId'
+format.belongsToMany(printer, {through: 'printerFormat'});//, foreignKey: 'formatId'
 
 //sequelize.models.division.hasMany(order);
 order.belongsTo(division, {foreignKey: 'divisionId', sourceKey: 'id'});
@@ -123,6 +123,9 @@ order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});
 
 order.belongsTo(printer, {foreignKey: 'coverPrinterId', sourceKey: 'id'});
 order.belongsTo(printer, {foreignKey: 'blockPrinterId', sourceKey: 'id'});
+
+order.belongsTo(format, {foreignKey: 'coverFormatId', sourceKey: 'id'});
+order.belongsTo(format, {foreignKey: 'blockFormatId', sourceKey: 'id'});
 
 order.belongsTo(material, {foreignKey: 'coverMaterialId', sourceKey: 'id'});
 order.belongsTo(material, {foreignKey: 'blockMaterialId', sourceKey: 'id'});
