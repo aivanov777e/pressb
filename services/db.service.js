@@ -23,7 +23,8 @@ const config =  {
     },
     // logging: console.log, // Включаем логи запросов, нужно передать именно функцию, либо false
     // storage: './test_db.db', // Путь к файлу БД
-    operatorsAliases: Sequelize.Op // Передаём алиасы параметров (дальше покажу нафига)  
+    //operatorsAliases: Sequelize.Op // Передаём алиасы параметров (дальше покажу нафига)  
+    operatorsAliases: false
 };
 const sequelize = new Sequelize(config);
 

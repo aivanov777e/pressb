@@ -77,6 +77,36 @@ let material = sequelize.define('material', {
   name: Sequelize.STRING,
 }, {});
 
+let paper = sequelize.define('paper', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  //name: Sequelize.STRING,
+  density: Sequelize.INTEGER,
+  // price: Sequelize.DECIMAL(10, 2),
+  // startDate: Sequelize.DATE,
+  // endDate: Sequelize.DATE 
+}, {});
+
+let paperPrice = sequelize.define('paperPrice', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  paperId: {
+    type: Sequelize.UUID,
+    allowNull: false,
+  },
+  startDate: Sequelize.DATE,
+  endDate: Sequelize.DATE,
+  price: Sequelize.DECIMAL(10, 2),
+}, {});
+
 let printer = sequelize.define('printer', {
   id: {
     type: Sequelize.UUID,
@@ -117,6 +147,12 @@ order.belongsTo(division, {foreignKey: 'divisionId', sourceKey: 'id'});
 order.belongsTo(subdivision, {foreignKey: 'subdivisionId', sourceKey: 'id'});
 //sequelize.models.contact.hasMany(order);
 order.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
+
+paper.belongsTo(material, {foreignKey: 'materialId', sourceKey: 'id'});
+paper.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
+
+paper.hasMany(paperPrice);
+paperPrice.belongsTo(paper);
 
 order.belongsTo(contact, {foreignKey: 'coverPerformerId', sourceKey: 'id'});
 order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});
@@ -178,6 +214,36 @@ async function createTestData() {
   let format1500 = await sequelize.models.format.create({name: 'Рулон 1500 мм', width: 1500});
   let format1600 = await sequelize.models.format.create({name: 'Рулон 1600 мм', width: 1600});
 
+  let materialOfs = await sequelize.models.material.create({name: 'Офсет'});
+  let materialVHI = await sequelize.models.material.create({name: 'ВХИ'});
+  let materialSne = await sequelize.models.material.create({name: 'Снегурочка'});
+  let materialSam = await sequelize.models.material.create({name: 'Самоклеющиеся бумага'});
+  let materialDis = await sequelize.models.material.create({name: 'Дизайнерская бумага'});
+  let materialMel = await sequelize.models.material.create({name: 'Мелованная бумага'});
+  let materialKar = await sequelize.models.material.create({name: 'Картон'});
+  let materialBan = await sequelize.models.material.create({name: 'Банер'});
+  let materialFot = await sequelize.models.material.create({name: 'Фото бумага'});
+  let materialPle = await sequelize.models.material.create({name: 'Плёнка'});
+
+  await paper.create({materialId: materialOfs.id, formatId: formatA3.id, density: 70})
+  .then(p => {
+    paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 0.57})
+    paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2018, 0, 1)), endDate: new Date(Date.UTC(2019, 0, 1)), price: 0.33})
+  });
+  await paper.create({materialId: materialOfs.id, formatId: formatA2.id, density: 70}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 1.14}));
+  await paper.create({materialId: materialVHI.id, formatId: formatA3.id, density: 180}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 1.63}));
+  await paper.create({materialId: materialVHI.id, formatId: formatA2.id, density: 180}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 3.26}));
+  await paper.create({materialId: materialSne.id, formatId: formatA3.id, density: 80}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 0.93}));
+  await paper.create({materialId: materialSam.id, formatId: formatA3.id, density: 70}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 15.73}));
+  await paper.create({materialId: materialDis.id, formatId: formatA3.id, density: 120}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 38.78}));
+  await paper.create({materialId: materialDis.id, formatId: formatA3.id, density: 250}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 75.75}));
+  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 115}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 2.47}));
+  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 150}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 2.67}));
+  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 170}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 3.09}));
+  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 200}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 4.14}));
+  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 5.19}));
+  await paper.create({materialId: materialKar.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 7.06}));
+
   // let newFormats = [
   //   {name: 'А0', width: 1189, height: 841},
   //   {name: 'А1', width: 841, height: 594},
@@ -214,22 +280,6 @@ async function createTestData() {
   let color2 = await sequelize.models.color.create({name: '2'});
   let color3 = await sequelize.models.color.create({name: '3'});
   let color4 = await sequelize.models.color.create({name: '4'});
-
-  let materialOfs = await sequelize.models.material.create({name: 'Офсет 70 гр'});
-  let materialVHI = await sequelize.models.material.create({name: 'ВХИ 180 гр'});
-  let materialSne = await sequelize.models.material.create({name: 'Снегурочка'});
-  let materialSam = await sequelize.models.material.create({name: 'Самоклеющиеся бумага'});
-  let materialD12 = await sequelize.models.material.create({name: 'Дизайнерская бумага 120 гр'});
-  let materialD25 = await sequelize.models.material.create({name: 'Дизайнерская бумага 250 гр'});
-  let materialM11 = await sequelize.models.material.create({name: 'Мелованная бумага 115 гр'});
-  let materialM15 = await sequelize.models.material.create({name: 'Мелованная бумага 150 гр'});
-  let materialM17 = await sequelize.models.material.create({name: 'Мелованная бумага 170 гр'});
-  let materialM20 = await sequelize.models.material.create({name: 'Мелованная бумага 200 гр'});
-  let materialM30 = await sequelize.models.material.create({name: 'Мелованная бумага 300 гр'});
-  let materialK30 = await sequelize.models.material.create({name: 'Картон 300 гр'});
-  let materialBan = await sequelize.models.material.create({name: 'Банер'});
-  let materialFot = await sequelize.models.material.create({name: 'Фото бумага'});
-  let materialPle = await sequelize.models.material.create({name: 'Плёнка'});
 
   // console.log(printerRol.id);  
   // console.log(formatA2.id);  

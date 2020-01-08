@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../services/db.service');
-    
+const Op = Sequelize.Op
+
 class HandbookController {
   async getPrinter(req, res){
     console.log('getPrinter');
@@ -16,12 +17,17 @@ class HandbookController {
   async getFormat(req, res){
     console.log('getFormat');
     //let wh = {divisionId: req.query.divisionId}
-    let wh = {}
+    //let data
+    let includePrinter = []
     if (req.query.printerId) {
-      wh.name = {[Sequelize.Op.like]: '%' + req.query.mask + '%'};
+      //wh.name = {[Op.like]: '%' + req.query.mask + '%'};
+      includePrinter = [{ model: sequelize.models.printer, as: 'printers', through: 'printerFormat', where:{id: req.query.printerId}}]
     }
     let data = await sequelize.models.format.findAll({
-      include: [{ model: sequelize.models.printer, as: 'printers', through: 'printerFormat', where:{id: req.query.printerId}}]
+//      include: [{ model: sequelize.models.printer, as: 'printers', through: 'printerFormat', where:{id: req.query.printerId}}]
+        attributes: ['id', 'name'],
+        include: includePrinter,
+        order: [['name', 'ASC']]
     });
     return res.status(200).send(data);
   }
@@ -44,7 +50,10 @@ class HandbookController {
     // if (req.query.printerId) {
     //   wh.name = {[Sequelize.Op.like]: '%' + req.query.mask + '%'};
     // }
-    let data = await sequelize.models.material.findAll({ order: [['name', 'ASC']]});
+    let data = await sequelize.models.material.findAll({ 
+      attributes: ['id', 'name'],
+      order: [['name', 'ASC']]
+    });
     return res.status(200).send(data);
   }
 }
