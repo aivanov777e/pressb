@@ -107,6 +107,38 @@ let paperPrice = sequelize.define('paperPrice', {
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
+let work = sequelize.define('work', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  name: Sequelize.STRING,
+  //postPress: Sequelize.INTEGER, // 0 нет, 1 блок, 2 обложка
+  postPressBlock: Sequelize.BOOLEAN,
+  postPressCover: Sequelize.BOOLEAN,
+}, {});
+
+let workPrice = sequelize.define('workPrice', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  workId: {
+    type: Sequelize.UUID,
+    allowNull: false,
+  },
+  // startDate: Sequelize.DATE,
+  // endDate: Sequelize.DATE,
+  color1: Sequelize.INTEGER,
+  color2: Sequelize.INTEGER,
+  countFrom: Sequelize.INTEGER,
+  price: Sequelize.DECIMAL(10, 2),
+}, {});
+
 let printer = sequelize.define('printer', {
   id: {
     type: Sequelize.UUID,
@@ -153,6 +185,10 @@ paper.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 
 paper.hasMany(paperPrice);
 paperPrice.belongsTo(paper);
+
+work.hasMany(workPrice);
+workPrice.belongsTo(work);
+workPrice.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 
 order.belongsTo(contact, {foreignKey: 'coverPerformerId', sourceKey: 'id'});
 order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});

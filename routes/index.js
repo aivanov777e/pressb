@@ -5,6 +5,7 @@ divisionRoutes = require("./division.routes");
 contactRoutes = require("./contact.routes");
 handbookRoutes = require("./handbook.routes");
 paperRoutes = require("./paper.routes");
+workRoutes = require("./work.routes");
 
 router.use(async (req, res, next) => {
   console.log('index.js');
@@ -19,5 +20,6 @@ router.use('/division', divisionRoutes);
 router.use('/contact', contactRoutes);
 router.use('/handbook', handbookRoutes);
 router.use('/paper', paperRoutes);
+router.use('/work', workRoutes);
 
 module.exports = router;
