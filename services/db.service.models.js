@@ -116,8 +116,8 @@ let work = sequelize.define('work', {
   },
   name: Sequelize.STRING,
   //postPress: Sequelize.INTEGER, // 0 нет, 1 блок, 2 обложка
-  postPressBlock: Sequelize.BOOLEAN,
   postPressCover: Sequelize.BOOLEAN,
+  postPressBlock: Sequelize.BOOLEAN,
 }, {});
 
 let workPrice = sequelize.define('workPrice', {

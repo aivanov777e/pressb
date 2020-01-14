@@ -17,7 +17,13 @@ class WorkController {
         //const dataLast = await sequelize.models.work.findOne({ order: [['regDate', 'DESC']], raw: true });
         data = {}
       } else {
-        data = await sequelize.models.work.findByPk(req.query.id, {include: [{ all: true, nested: false }]});
+        data = await sequelize.models.work.findByPk(req.query.id, {//{include: [{ all: true, nested: true }]
+          include: [
+            { model: sequelize.models.workPrice, nested: false, required: false,
+              include: [{ model: sequelize.models.format, nested: false, required: false}]
+            }
+          ]
+        });
       }
     } else {
       //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
@@ -64,7 +70,7 @@ class WorkController {
     console.log('createWorkPrice');
     //console.log(req);
     let newWork = await sequelize.models.workPrice.create(req.body);
-    let data = await sequelize.models.workPrice.findByPk(newWork.id);
+    let data = await sequelize.models.workPrice.findByPk(newWork.id, {include: [{ model: sequelize.models.format, nested: false, required: false}]});
     return res.status(200).send(data);
   }
 
@@ -72,7 +78,7 @@ class WorkController {
     console.log('updateWorkPrice');
     //console.log(req);
     await sequelize.models.workPrice.update(req.body, { where: { id: req.body.id } });
-    let data = await sequelize.models.workPrice.findByPk(req.body.id);
+    let data = await sequelize.models.workPrice.findByPk(req.body.id, {include: [{ model: sequelize.models.format, nested: false, required: false}]});
     return res.status(200).send(data);
   }
 
