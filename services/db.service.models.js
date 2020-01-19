@@ -139,7 +139,7 @@ let workPrice = sequelize.define('workPrice', {
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
-let printer = sequelize.define('printer', {
+let equipment = sequelize.define('equipment', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -147,7 +147,7 @@ let printer = sequelize.define('printer', {
     //allowNull: false,
   },
   name: Sequelize.STRING,
-}, {});
+});
 
 let order = sequelize.define('order', {
   id: {
@@ -170,8 +170,12 @@ let order = sequelize.define('order', {
 
 division.hasMany(subdivision);
 
-printer.belongsToMany(format, {through: 'printerFormat'});//, foreignKey: 'printerId'
-format.belongsToMany(printer, {through: 'printerFormat'});//, foreignKey: 'formatId'
+let equipmentFormat = sequelize.define('equipmentFormat');
+
+equipment.belongsTo(work);
+equipment.belongsToMany(format, {through: 'equipmentFormat'});//, foreignKey: 'equipmentId'
+format.belongsToMany(equipment, {through: 'equipmentFormat'});//, foreignKey: 'formatId'
+equipment.hasMany(equipmentFormat);
 
 //sequelize.models.division.hasMany(order);
 order.belongsTo(division, {foreignKey: 'divisionId', sourceKey: 'id'});
@@ -193,8 +197,8 @@ workPrice.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 order.belongsTo(contact, {foreignKey: 'coverPerformerId', sourceKey: 'id'});
 order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});
 
-order.belongsTo(printer, {foreignKey: 'coverPrinterId', sourceKey: 'id'});
-order.belongsTo(printer, {foreignKey: 'blockPrinterId', sourceKey: 'id'});
+order.belongsTo(equipment, {foreignKey: 'coverEquipmentId', sourceKey: 'id'});
+order.belongsTo(equipment, {foreignKey: 'blockEquipmentId', sourceKey: 'id'});
 
 order.belongsTo(format, {foreignKey: 'coverFormatId', sourceKey: 'id'});
 order.belongsTo(format, {foreignKey: 'blockFormatId', sourceKey: 'id'});
@@ -280,6 +284,18 @@ async function createTestData() {
   await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 5.19}));
   await paper.create({materialId: materialKar.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 7.06}));
 
+  await work.create({name: 'Офсетная печать'}).then(w => {
+    workPrice.create({workId: w.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1, price: 4.23})
+  });
+  await work.create({name: 'Цифровая печать'});
+  await work.create({name: 'Широкоформатная печать'});
+  await work.create({name: 'Шелкография'});
+
+  await work.create({name: 'Ламинация пакетная', postPressBlock: 1, postPressBlock: 1});
+  await work.create({name: 'Ламинация рулонная', postPressBlock: 1, postPressBlock: 1});
+  await work.create({name: 'Вырубка', postPressBlock: 1, postPressBlock: 1});
+  await work.create({name: 'Счёт листов', postPressBlock: 1, postPressBlock: 1});
+
   // let newFormats = [
   //   {name: 'А0', width: 1189, height: 841},
   //   {name: 'А1', width: 841, height: 594},
@@ -300,16 +316,16 @@ async function createTestData() {
   // ]
   // await sequelize.models.format.bulkCreate(newFormats);
 
-  let printerRol = await sequelize.models.printer.create({name: 'Роланд'});
-  let printerHam = await sequelize.models.printer.create({name: 'Хамада'});
-  let printerX75 = await sequelize.models.printer.create({name: 'Xerox 75'});
-  let printerX700 = await sequelize.models.printer.create({name: 'Xerox 700'});
-  let printerX7535 = await sequelize.models.printer.create({name: 'Xerox 7535'});
-  let printerX95 = await sequelize.models.printer.create({name: 'Xerox 95'});
-  let printerD550 = await sequelize.models.printer.create({name: 'Duplo 550'});
-  let printerMim = await sequelize.models.printer.create({name: 'Mimaki'});
-  let printerX6200 = await sequelize.models.printer.create({name: 'Xerox 6200'});
-  let printerSh = await sequelize.models.printer.create({name: 'Шелкография'});
+  let equipmentRol = await sequelize.models.equipment.create({name: 'Роланд'});
+  let equipmentHam = await sequelize.models.equipment.create({name: 'Хамада'});
+  let equipmentX75 = await sequelize.models.equipment.create({name: 'Xerox 75'});
+  let equipmentX700 = await sequelize.models.equipment.create({name: 'Xerox 700'});
+  let equipmentX7535 = await sequelize.models.equipment.create({name: 'Xerox 7535'});
+  let equipmentX95 = await sequelize.models.equipment.create({name: 'Xerox 95'});
+  let equipmentD550 = await sequelize.models.equipment.create({name: 'Duplo 550'});
+  let equipmentMim = await sequelize.models.equipment.create({name: 'Mimaki'});
+  let equipmentX6200 = await sequelize.models.equipment.create({name: 'Xerox 6200'});
+  let equipmentSh = await sequelize.models.equipment.create({name: 'Шелкография'});
 
   let color0 = await sequelize.models.color.create({name: '0'});
   let color1 = await sequelize.models.color.create({name: '1'});
@@ -317,27 +333,27 @@ async function createTestData() {
   let color3 = await sequelize.models.color.create({name: '3'});
   let color4 = await sequelize.models.color.create({name: '4'});
 
-  // console.log(printerRol.id);  
+  // console.log(equipmentRol.id);  
   // console.log(formatA2.id);  
-  await sequelize.models.printerFormat.create({printerId: printerRol.id, formatId: formatA2.id});
-  await sequelize.models.printerFormat.create({printerId: printerHam.id, formatId: formatA3.id});
-  await sequelize.models.printerFormat.create({printerId: printerMim.id, formatId: format1000.id});
-  await sequelize.models.printerFormat.create({printerId: printerMim.id, formatId: format1250.id});
-  await sequelize.models.printerFormat.create({printerId: printerMim.id, formatId: format1360.id});
-  await sequelize.models.printerFormat.create({printerId: printerMim.id, formatId: format1500.id});
-  await sequelize.models.printerFormat.create({printerId: printerMim.id, formatId: format1600.id});
-  await sequelize.models.printerFormat.create({printerId: printerX6200.id, formatId: formatA0.id});
-  await sequelize.models.printerFormat.create({printerId: printerX6200.id, formatId: formatA1.id});
-  await sequelize.models.printerFormat.create({printerId: printerX6200.id, formatId: formatA2.id});
-  await sequelize.models.printerFormat.create({printerId: printerX6200.id, formatId: format300.id});
-  await sequelize.models.printerFormat.create({printerId: printerX6200.id, formatId: format420.id});
-  await sequelize.models.printerFormat.create({printerId: printerX6200.id, formatId: format841.id});
-  await sequelize.models.printerFormat.create({printerId: printerX75.id, formatId: formatA3.id});
-  await sequelize.models.printerFormat.create({printerId: printerX700.id, formatId: formatA3.id});
-  await sequelize.models.printerFormat.create({printerId: printerX95.id, formatId: formatA3.id});
-  await sequelize.models.printerFormat.create({printerId: printerD550.id, formatId: formatA3.id});
-  await sequelize.models.printerFormat.create({printerId: printerX7535.id, formatId: formatA3.id});
-  // let newPrinters = [
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentRol.id, formatId: formatA2.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentHam.id, formatId: formatA3.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentMim.id, formatId: format1000.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentMim.id, formatId: format1250.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentMim.id, formatId: format1360.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentMim.id, formatId: format1500.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentMim.id, formatId: format1600.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX6200.id, formatId: formatA0.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX6200.id, formatId: formatA1.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX6200.id, formatId: formatA2.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX6200.id, formatId: format300.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX6200.id, formatId: format420.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX6200.id, formatId: format841.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX75.id, formatId: formatA3.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX700.id, formatId: formatA3.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX95.id, formatId: formatA3.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentD550.id, formatId: formatA3.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentX7535.id, formatId: formatA3.id});
+  // let newEquipments = [
   //   {name: 'Роланд'},
   //   {name: 'Хамада'},
   //   {name: 'Xerox 75'},
@@ -349,5 +365,5 @@ async function createTestData() {
   //   {name: 'Xerox 6200'},
   //   {name: 'Шелкография'},
   // ]
-  // await sequelize.models.printer.bulkCreate(newPrinters);
+  // await sequelize.models.equipment.bulkCreate(newEquipments);
 }

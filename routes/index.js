@@ -6,6 +6,7 @@ contactRoutes = require("./contact.routes");
 handbookRoutes = require("./handbook.routes");
 paperRoutes = require("./paper.routes");
 workRoutes = require("./work.routes");
+equipmentRoutes = require("./equipment.routes");
 
 router.use(async (req, res, next) => {
   console.log('index.js');
@@ -21,5 +22,6 @@ router.use('/contact', contactRoutes);
 router.use('/handbook', handbookRoutes);
 router.use('/paper', paperRoutes);
 router.use('/work', workRoutes);
+router.use('/equipment', equipmentRoutes);
 
 module.exports = router;
