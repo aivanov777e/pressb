@@ -19,6 +19,25 @@ class PaperController {
       } else {
         data = await sequelize.models.paper.findByPk(req.query.id, {include: [{ all: true, nested: false }]});
       }
+    } else if (req.query.formatId && req.query.materialId) {
+      data = await sequelize.models.paper.findAll({ 
+        order: [['density', 'ASC']], 
+        raw: true, 
+        where: { 'formatId': req.query.formatId, 'materialId': req.query.materialId },
+        include: [
+          { model: sequelize.models.paperPrice, 
+            nested: false, 
+            required: false,
+            where: { 
+              'startDate': { [Op.lte]: at }, 
+              [Op.or]: [
+                {'endDate': { [Op.gt]: at }},
+                {'endDate': { [Op.is ]: null}}
+              ]
+            }
+          }
+        ] 
+      });
     } else {
       //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
       data = await sequelize.models.paper.findAll({ 

@@ -57,15 +57,15 @@ let format = sequelize.define('format', {
   height: Sequelize.INTEGER,
 }, {});
 
-let color = sequelize.define('color', {
-  id: {
-    type: Sequelize.UUID,
-    defaultValue: Sequelize.UUIDV1,
-    primaryKey: true,
-    //allowNull: false,
-  },
-  name: Sequelize.STRING,
-}, {});
+// let color = sequelize.define('color', {
+//   id: {
+//     type: Sequelize.UUID,
+//     defaultValue: Sequelize.UUIDV1,
+//     primaryKey: true,
+//     //allowNull: false,
+//   },
+//   name: Sequelize.STRING,
+// }, {});
 
 let material = sequelize.define('material', {
   id: {
@@ -136,6 +136,7 @@ let workPrice = sequelize.define('workPrice', {
   color1: Sequelize.INTEGER,
   color2: Sequelize.INTEGER,
   countFrom: Sequelize.INTEGER,
+  option: Sequelize.STRING,
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
@@ -159,16 +160,50 @@ let order = sequelize.define('order', {
   regDate: Sequelize.DATE,
   name: Sequelize.STRING,
   number: Sequelize.STRING,
-  productCount: Sequelize.INTEGER,
-  productWidth: Sequelize.INTEGER,
-  productHeigth: Sequelize.INTEGER,
-  coverCount: Sequelize.INTEGER,
-  blockCount: Sequelize.INTEGER,
-  coverCountAdj: Sequelize.INTEGER,
-  blockCountAdj: Sequelize.INTEGER,  
+  count: Sequelize.INTEGER,
+  width: Sequelize.INTEGER,
+  heigth: Sequelize.INTEGER,
+  // coverCount: Sequelize.INTEGER,
+  // blockCount: Sequelize.INTEGER,
+  // coverCountAdj: Sequelize.INTEGER,
+  // blockCountAdj: Sequelize.INTEGER,
+  // coverColor1: Sequelize.INTEGER,
+  // coverColor2: Sequelize.INTEGER,
+  // blockColor1: Sequelize.INTEGER,
+  // blockColor2: Sequelize.INTEGER,
+  price: Sequelize.DECIMAL(10, 2),
 }, {});
 
-division.hasMany(subdivision);
+let orderPress = sequelize.define('orderPress', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  count: Sequelize.INTEGER,
+  countAdj: Sequelize.INTEGER,
+  color1: Sequelize.INTEGER,
+  color2: Sequelize.INTEGER,
+  pricePaper: Sequelize.DECIMAL(10, 2),
+  pricePress: Sequelize.DECIMAL(10, 2),
+});
+
+let orderPostPress = sequelize.define('orderPostPress', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV1,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  workType: Sequelize.ENUM('cover', 'block'),
+  // count: Sequelize.INTEGER,
+  // countAdj: Sequelize.INTEGER,
+  // color1: Sequelize.INTEGER,
+  // color2: Sequelize.INTEGER,
+  option: Sequelize.STRING,
+  price: Sequelize.DECIMAL(10, 2),
+});
 
 let equipmentFormat = sequelize.define('equipmentFormat');
 
@@ -177,14 +212,8 @@ equipment.belongsToMany(format, {through: 'equipmentFormat'});//, foreignKey: 'e
 format.belongsToMany(equipment, {through: 'equipmentFormat'});//, foreignKey: 'formatId'
 equipment.hasMany(equipmentFormat);
 
-//sequelize.models.division.hasMany(order);
-order.belongsTo(division, {foreignKey: 'divisionId', sourceKey: 'id'});
-//sequelize.models.division.hasMany(order, {foreignKey: 'subdivisionId', sourceKey: 'id'});
-order.belongsTo(subdivision, {foreignKey: 'subdivisionId', sourceKey: 'id'});
-//sequelize.models.contact.hasMany(order);
-order.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
-
 paper.belongsTo(material, {foreignKey: 'materialId', sourceKey: 'id'});
+material.hasMany(paper);
 paper.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 
 paper.hasMany(paperPrice);
@@ -194,25 +223,48 @@ work.hasMany(workPrice);
 workPrice.belongsTo(work);
 workPrice.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 
-order.belongsTo(contact, {foreignKey: 'coverPerformerId', sourceKey: 'id'});
-order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});
 
-order.belongsTo(equipment, {foreignKey: 'coverEquipmentId', sourceKey: 'id'});
-order.belongsTo(equipment, {foreignKey: 'blockEquipmentId', sourceKey: 'id'});
+division.hasMany(subdivision);
 
-order.belongsTo(format, {foreignKey: 'coverFormatId', sourceKey: 'id'});
-order.belongsTo(format, {foreignKey: 'blockFormatId', sourceKey: 'id'});
+//sequelize.models.division.hasMany(order);
+order.belongsTo(division, {foreignKey: 'divisionId', sourceKey: 'id'});
+//sequelize.models.division.hasMany(order, {foreignKey: 'subdivisionId', sourceKey: 'id'});
+order.belongsTo(subdivision, {foreignKey: 'subdivisionId', sourceKey: 'id'});
+//sequelize.models.contact.hasMany(order);
+order.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
+order.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 
-order.belongsTo(material, {foreignKey: 'coverMaterialId', sourceKey: 'id'});
-order.belongsTo(material, {foreignKey: 'blockMaterialId', sourceKey: 'id'});
+// order.belongsTo(contact, {foreignKey: 'coverPerformerId', sourceKey: 'id'});
+// order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});
 
-order.belongsTo(color, {foreignKey: 'coverColor1Id', sourceKey: 'id'});
-order.belongsTo(color, {foreignKey: 'coverColor2Id', sourceKey: 'id'});
-order.belongsTo(color, {foreignKey: 'blockColor1Id', sourceKey: 'id'});
-order.belongsTo(color, {foreignKey: 'blockColor2Id', sourceKey: 'id'});
+// order.belongsTo(equipment, {foreignKey: 'coverEquipmentId', sourceKey: 'id'});
+// order.belongsTo(equipment, {foreignKey: 'blockEquipmentId', sourceKey: 'id'});
 
+// order.belongsTo(format, {foreignKey: 'coverFormatId', sourceKey: 'id'});
+// order.belongsTo(format, {foreignKey: 'blockFormatId', sourceKey: 'id'});
 
+// order.belongsTo(paper, {foreignKey: 'coverPaperId', sourceKey: 'id'});
+// order.belongsTo(paper, {foreignKey: 'blockPaperId', sourceKey: 'id'});
+// order.belongsTo(material, {foreignKey: 'coverMaterialId', sourceKey: 'id'});
+// order.belongsTo(material, {foreignKey: 'blockMaterialId', sourceKey: 'id'});
 
+// order.belongsTo(color, {foreignKey: 'coverColor1Id', sourceKey: 'id'});
+// order.belongsTo(color, {foreignKey: 'coverColor2Id', sourceKey: 'id'});
+// order.belongsTo(color, {foreignKey: 'blockColor1Id', sourceKey: 'id'});
+// order.belongsTo(color, {foreignKey: 'blockColor2Id', sourceKey: 'id'});
+
+order.belongsTo(orderPress, {foreignKey: 'cover', sourceKey: 'id'});
+order.belongsTo(orderPress, {foreignKey: 'block', sourceKey: 'id'});
+
+order.hasMany(orderPostPress);
+
+orderPress.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
+orderPress.belongsTo(equipment, {foreignKey: 'equipmentId', sourceKey: 'id'});
+orderPress.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
+orderPress.belongsTo(paper, {foreignKey: 'paperId', sourceKey: 'id'});
+
+orderPostPress.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
+orderPostPress.belongsTo(work, {foreignKey: 'workId', sourceKey: 'id'});
 
 sequelize.sync({ force: true }).then(result=>{
   console.log(result);  
@@ -327,11 +379,11 @@ async function createTestData() {
   let equipmentX6200 = await sequelize.models.equipment.create({name: 'Xerox 6200'});
   let equipmentSh = await sequelize.models.equipment.create({name: 'Шелкография'});
 
-  let color0 = await sequelize.models.color.create({name: '0'});
-  let color1 = await sequelize.models.color.create({name: '1'});
-  let color2 = await sequelize.models.color.create({name: '2'});
-  let color3 = await sequelize.models.color.create({name: '3'});
-  let color4 = await sequelize.models.color.create({name: '4'});
+  // let color0 = await sequelize.models.color.create({name: '0'});
+  // let color1 = await sequelize.models.color.create({name: '1'});
+  // let color2 = await sequelize.models.color.create({name: '2'});
+  // let color3 = await sequelize.models.color.create({name: '3'});
+  // let color4 = await sequelize.models.color.create({name: '4'});
 
   // console.log(equipmentRol.id);  
   // console.log(formatA2.id);  
