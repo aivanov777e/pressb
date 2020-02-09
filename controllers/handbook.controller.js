@@ -30,7 +30,21 @@ class HandbookController {
     // if (req.query.equipmentId) {
     //   wh.name = {[Sequelize.Op.like]: '%' + req.query.mask + '%'};
     // }
-    let data = await sequelize.models.color.findAll({ order: [['name', 'ASC']]});
+    //let data = await sequelize.models.color.findAll({ order: [['name', 'ASC']]});
+    let data = [];
+    if (req.query.equipmentId && req.query.formatId) {
+      // data = await sequelize.models.workPrice.findAll({ 
+      //   attributes: [[sequelize.fn('DISTINCT', sequelize.col('col_name')), 'alias_name']],
+      //   order: [['name', 'ASC']]
+      // });
+      data = await sequelize.query(`
+        select distinct color1::text || '+' || color2 as "name", color1, color2 from "workPrices" wp
+          inner join "equipment" e on wp."workId" = e."workId"
+          where e.id = '` + req.query.equipmentId + `'
+            and wp."formatId" = '` + req.query.formatId + `'
+          order by 1`
+      , { type: sequelize.QueryTypes.SELECT });
+    }
     return res.status(200).send(data);
   }
 

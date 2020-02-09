@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../services/db.service');
-const Op = Sequelize.Op
+const Op = Sequelize.Op;
 //import * as moment from 'moment';
 var moment = require('moment');
     

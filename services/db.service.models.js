@@ -14,7 +14,7 @@ let contact = sequelize.define('contact', {
   },
   tel: Sequelize.STRING,
   divisionId: {
-    allowNull: false,
+    //allowNull: false,
     type: Sequelize.UUID,
   },
 },{});
@@ -253,14 +253,15 @@ order.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 // order.belongsTo(color, {foreignKey: 'blockColor1Id', sourceKey: 'id'});
 // order.belongsTo(color, {foreignKey: 'blockColor2Id', sourceKey: 'id'});
 
-order.belongsTo(orderPress, {foreignKey: 'cover', sourceKey: 'id'});
-order.belongsTo(orderPress, {foreignKey: 'block', sourceKey: 'id'});
+order.Cover = order.belongsTo(orderPress, {foreignKey: 'coverId', as: 'cover', sourceKey: 'id'});
+order.Block = order.belongsTo(orderPress, {foreignKey: 'blockId', as: 'block', sourceKey: 'id'});
 
 order.hasMany(orderPostPress);
 
 orderPress.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
 orderPress.belongsTo(equipment, {foreignKey: 'equipmentId', sourceKey: 'id'});
 orderPress.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
+orderPress.belongsTo(material);
 orderPress.belongsTo(paper, {foreignKey: 'paperId', sourceKey: 'id'});
 
 orderPostPress.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
@@ -287,6 +288,10 @@ async function createTestData() {
     divisionId: newDivisionRecord.id
   }
   let newOrderRecord = await sequelize.models.order.create(newOrder);
+
+  contact.create({name: 'Иванова Е.В.'});
+  contact.create({name: 'Болотина А.Н.'});
+  contact.create({name: 'Моносян З.Г.'});
 
 
   let formatA0 = await sequelize.models.format.create({name: 'А0', width: 1189, height: 841});
@@ -336,9 +341,15 @@ async function createTestData() {
   await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 5.19}));
   await paper.create({materialId: materialKar.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 7.06}));
 
-  await work.create({name: 'Офсетная печать'}).then(w => {
-    workPrice.create({workId: w.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1, price: 4.23})
-  });
+  let workOf = await work.create({name: 'Офсетная печать'})//.then(w => {
+    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1, price: 4.23})
+    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1001, price: 2.75})
+    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 2001, price: 1.85})
+
+    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1, price: 5.09})
+    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1001, price: 3.30})
+    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 2001, price: 2.21})
+  //});
   await work.create({name: 'Цифровая печать'});
   await work.create({name: 'Широкоформатная печать'});
   await work.create({name: 'Шелкография'});
@@ -368,8 +379,8 @@ async function createTestData() {
   // ]
   // await sequelize.models.format.bulkCreate(newFormats);
 
-  let equipmentRol = await sequelize.models.equipment.create({name: 'Роланд'});
-  let equipmentHam = await sequelize.models.equipment.create({name: 'Хамада'});
+  let equipmentRol = await sequelize.models.equipment.create({name: 'Роланд', workId: workOf.id});
+  let equipmentHam = await sequelize.models.equipment.create({name: 'Хамада', workId: workOf.id});
   let equipmentX75 = await sequelize.models.equipment.create({name: 'Xerox 75'});
   let equipmentX700 = await sequelize.models.equipment.create({name: 'Xerox 700'});
   let equipmentX7535 = await sequelize.models.equipment.create({name: 'Xerox 7535'});
