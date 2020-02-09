@@ -76,7 +76,7 @@ class OrderController {
       body.contactId = contact.id;
     } else {
       // Если надо обновим телефон
-      let up = await sequelize.models.contact.update({tel: body.contact.contactTel}, {where: {id: body.contactId, tel: {[Op.ne]: body.contactTel}}});
+      let up = await sequelize.models.contact.update({tel: body.contactTel}, {where: {id: body.contactId, tel: {[Op.ne]: body.contactTel}}});
       console.log(up);
     }
 
