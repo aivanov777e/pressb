@@ -68,15 +68,19 @@ class OrderController {
       const newContact = {
         divisionId: body.subdivisionId || body.divisionId,
         name: body.contact,
-        tel: body.contactTel,
+        tel: body.contactTel || '',
       }
       //const [contact, created] = await sequelize.models.contact.findOrCreate({where: {divisionId: divisionId, name: body.contact.name}, defaults: body.contact});
       const contact = await sequelize.models.contact.create(newContact);
       //console.log(contact);
       body.contactId = contact.id;
-    } else {
+    } else if (body.contactId) {
       // Если надо обновим телефон
-      let up = await sequelize.models.contact.update({tel: body.contactTel}, {where: {id: body.contactId, tel: {[Op.ne]: body.contactTel}}});
+      const tel = body.contactTel || '';
+      let up = await sequelize.models.contact.update(
+        {tel: tel},
+        {where: {id: body.contactId, [Op.or]:[{tel: {[Op.ne]: tel}}, {tel: {[Op.is]: null}}]}}
+      );
       console.log(up);
     }
 

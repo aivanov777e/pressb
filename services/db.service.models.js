@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('./db.service');
 
-let contact = sequelize.define('contact', {
+let Contact = sequelize.define('contact', {
   id: {
     primaryKey: true,
     allowNull: false,
@@ -19,7 +19,7 @@ let contact = sequelize.define('contact', {
   },
 },{});
 
-let division = sequelize.define('division', {
+let Division = sequelize.define('division', {
   id: {
       primaryKey: true,
       allowNull: false,
@@ -32,7 +32,7 @@ let division = sequelize.define('division', {
   }},{}
 );
 
-let subdivision = sequelize.define('subdivision', {
+let Subdivision = sequelize.define('subdivision', {
   id: {
       primaryKey: true,
       allowNull: false,
@@ -45,7 +45,7 @@ let subdivision = sequelize.define('subdivision', {
   }},{}
 );
 
-let format = sequelize.define('format', {
+let Format = sequelize.define('format', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -67,7 +67,7 @@ let format = sequelize.define('format', {
 //   name: Sequelize.STRING,
 // }, {});
 
-let material = sequelize.define('material', {
+let Material = sequelize.define('material', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -77,7 +77,7 @@ let material = sequelize.define('material', {
   name: Sequelize.STRING,
 }, {});
 
-let paper = sequelize.define('paper', {
+let Paper = sequelize.define('paper', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -91,7 +91,7 @@ let paper = sequelize.define('paper', {
   // endDate: Sequelize.DATE 
 }, {});
 
-let paperPrice = sequelize.define('paperPrice', {
+let PaperPrice = sequelize.define('paperPrice', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -107,7 +107,7 @@ let paperPrice = sequelize.define('paperPrice', {
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
-let work = sequelize.define('work', {
+let Work = sequelize.define('work', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -120,7 +120,7 @@ let work = sequelize.define('work', {
   postPressBlock: Sequelize.BOOLEAN,
 }, {});
 
-let workPrice = sequelize.define('workPrice', {
+let WorkPrice = sequelize.define('workPrice', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -140,7 +140,7 @@ let workPrice = sequelize.define('workPrice', {
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
-let equipment = sequelize.define('equipment', {
+let Equipment = sequelize.define('equipment', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -150,7 +150,7 @@ let equipment = sequelize.define('equipment', {
   name: Sequelize.STRING,
 });
 
-let order = sequelize.define('order', {
+let Order = sequelize.define('order', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -174,7 +174,7 @@ let order = sequelize.define('order', {
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
-let orderPress = sequelize.define('orderPress', {
+let OrderPress = sequelize.define('orderPress', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -189,7 +189,7 @@ let orderPress = sequelize.define('orderPress', {
   pricePress: Sequelize.DECIMAL(10, 2),
 });
 
-let orderPostPress = sequelize.define('orderPostPress', {
+let OrderPostPress = sequelize.define('orderPostPress', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
@@ -205,34 +205,34 @@ let orderPostPress = sequelize.define('orderPostPress', {
   price: Sequelize.DECIMAL(10, 2),
 });
 
-let equipmentFormat = sequelize.define('equipmentFormat');
+let EquipmentFormat = sequelize.define('equipmentFormat');
 
-equipment.belongsTo(work);
-equipment.belongsToMany(format, {through: 'equipmentFormat'});//, foreignKey: 'equipmentId'
-format.belongsToMany(equipment, {through: 'equipmentFormat'});//, foreignKey: 'formatId'
-equipment.hasMany(equipmentFormat);
+Equipment.belongsTo(Work);
+Equipment.belongsToMany(Format, {through: 'equipmentFormat'});//, foreignKey: 'equipmentId'
+Format.belongsToMany(Equipment, {through: 'equipmentFormat'});//, foreignKey: 'formatId'
+Equipment.hasMany(EquipmentFormat);
 
-paper.belongsTo(material, {foreignKey: 'materialId', sourceKey: 'id'});
-material.hasMany(paper);
-paper.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
+Paper.belongsTo(Material, {foreignKey: 'materialId', sourceKey: 'id'});
+Material.hasMany(Paper);
+Paper.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 
-paper.hasMany(paperPrice);
-paperPrice.belongsTo(paper);
+Paper.hasMany(PaperPrice);
+PaperPrice.belongsTo(Paper);
 
-work.hasMany(workPrice);
-workPrice.belongsTo(work);
-workPrice.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
+Work.hasMany(WorkPrice);
+WorkPrice.belongsTo(Work);
+WorkPrice.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 
 
-division.hasMany(subdivision);
+Division.hasMany(Subdivision);
 
 //sequelize.models.division.hasMany(order);
-order.belongsTo(division, {foreignKey: 'divisionId', sourceKey: 'id'});
+Order.belongsTo(Division, {foreignKey: 'divisionId', sourceKey: 'id'});
 //sequelize.models.division.hasMany(order, {foreignKey: 'subdivisionId', sourceKey: 'id'});
-order.belongsTo(subdivision, {foreignKey: 'subdivisionId', sourceKey: 'id'});
+Order.belongsTo(Subdivision, {foreignKey: 'subdivisionId', sourceKey: 'id'});
 //sequelize.models.contact.hasMany(order);
-order.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
-order.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
+Order.belongsTo(Contact, {foreignKey: 'contactId', sourceKey: 'id'});
+Order.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 
 // order.belongsTo(contact, {foreignKey: 'coverPerformerId', sourceKey: 'id'});
 // order.belongsTo(contact, {foreignKey: 'blockPerformerId', sourceKey: 'id'});
@@ -253,19 +253,19 @@ order.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
 // order.belongsTo(color, {foreignKey: 'blockColor1Id', sourceKey: 'id'});
 // order.belongsTo(color, {foreignKey: 'blockColor2Id', sourceKey: 'id'});
 
-order.Cover = order.belongsTo(orderPress, {foreignKey: 'coverId', as: 'cover', sourceKey: 'id'});
-order.Block = order.belongsTo(orderPress, {foreignKey: 'blockId', as: 'block', sourceKey: 'id'});
+Order.Cover = Order.belongsTo(OrderPress, {foreignKey: 'coverId', as: 'cover', sourceKey: 'id'});
+Order.Block = Order.belongsTo(OrderPress, {foreignKey: 'blockId', as: 'block', sourceKey: 'id'});
 
-order.hasMany(orderPostPress);
+Order.hasMany(OrderPostPress);
 
-orderPress.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
-orderPress.belongsTo(equipment, {foreignKey: 'equipmentId', sourceKey: 'id'});
-orderPress.belongsTo(format, {foreignKey: 'formatId', sourceKey: 'id'});
-orderPress.belongsTo(material);
-orderPress.belongsTo(paper, {foreignKey: 'paperId', sourceKey: 'id'});
+OrderPress.belongsTo(Contact, {foreignKey: 'contactId', sourceKey: 'id'});
+OrderPress.belongsTo(Equipment, {foreignKey: 'equipmentId', sourceKey: 'id'});
+OrderPress.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
+OrderPress.belongsTo(Material);
+OrderPress.belongsTo(Paper, {foreignKey: 'paperId', sourceKey: 'id'});
 
-orderPostPress.belongsTo(contact, {foreignKey: 'contactId', sourceKey: 'id'});
-orderPostPress.belongsTo(work, {foreignKey: 'workId', sourceKey: 'id'});
+OrderPostPress.belongsTo(Contact, {foreignKey: 'contactId', sourceKey: 'id'});
+OrderPostPress.belongsTo(Work, {foreignKey: 'workId', sourceKey: 'id'});
 
 sequelize.sync({ force: true }).then(result=>{
   console.log(result);  
@@ -276,22 +276,20 @@ sequelize.sync({ force: true }).then(result=>{
 .catch(err=> console.log(err));  
 
 async function createTestData() {
-  let newDivision = {
-    name: 'Тест division',
-  }
-  let newDivisionRecord = await sequelize.models.division.create(newDivision);
+  let newDivision = await sequelize.models.division.create({name: 'Тест division'});
 
-  let newOrder = {
+  let newOrder = await Order.create({
     regDate: Date.now(),
     name: 'Тест order',
     number: '123',
-    divisionId: newDivisionRecord.id
-  }
-  let newOrderRecord = await sequelize.models.order.create(newOrder);
+    divisionId: newDivision.id,
+    cover: {},
+    block: {}
+  }, { include: [{ association: Order.Cover }, { association: Order.Block }] });
 
-  contact.create({name: 'Иванова Е.В.'});
-  contact.create({name: 'Болотина А.Н.'});
-  contact.create({name: 'Моносян З.Г.'});
+  Contact.create({name: 'Иванова Е.В.'});
+  Contact.create({name: 'Болотина А.Н.'});
+  Contact.create({name: 'Моносян З.Г.'});
 
 
   let formatA0 = await sequelize.models.format.create({name: 'А0', width: 1189, height: 841});
@@ -322,42 +320,42 @@ async function createTestData() {
   let materialFot = await sequelize.models.material.create({name: 'Фото бумага'});
   let materialPle = await sequelize.models.material.create({name: 'Плёнка'});
 
-  await paper.create({materialId: materialOfs.id, formatId: formatA3.id, density: 70})
+  await Paper.create({materialId: materialOfs.id, formatId: formatA3.id, density: 70})
   .then(p => {
-    paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 0.57})
-    paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2018, 0, 1)), endDate: new Date(Date.UTC(2019, 0, 1)), price: 0.33})
+    PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 0.57})
+    PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2018, 0, 1)), endDate: new Date(Date.UTC(2019, 0, 1)), price: 0.33})
   });
-  await paper.create({materialId: materialOfs.id, formatId: formatA2.id, density: 70}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 1.14}));
-  await paper.create({materialId: materialVHI.id, formatId: formatA3.id, density: 180}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 1.63}));
-  await paper.create({materialId: materialVHI.id, formatId: formatA2.id, density: 180}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 3.26}));
-  await paper.create({materialId: materialSne.id, formatId: formatA3.id, density: 80}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 0.93}));
-  await paper.create({materialId: materialSam.id, formatId: formatA3.id, density: 70}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 15.73}));
-  await paper.create({materialId: materialDis.id, formatId: formatA3.id, density: 120}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 38.78}));
-  await paper.create({materialId: materialDis.id, formatId: formatA3.id, density: 250}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 75.75}));
-  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 115}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 2.47}));
-  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 150}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 2.67}));
-  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 170}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 3.09}));
-  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 200}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 4.14}));
-  await paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 5.19}));
-  await paper.create({materialId: materialKar.id, formatId: formatA3.id, density: 300}).then(p => paperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 7.06}));
+  await Paper.create({materialId: materialOfs.id, formatId: formatA2.id, density: 70}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 1.14}));
+  await Paper.create({materialId: materialVHI.id, formatId: formatA3.id, density: 180}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 1.63}));
+  await Paper.create({materialId: materialVHI.id, formatId: formatA2.id, density: 180}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 3.26}));
+  await Paper.create({materialId: materialSne.id, formatId: formatA3.id, density: 80}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 0.93}));
+  await Paper.create({materialId: materialSam.id, formatId: formatA3.id, density: 70}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 15.73}));
+  await Paper.create({materialId: materialDis.id, formatId: formatA3.id, density: 120}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 38.78}));
+  await Paper.create({materialId: materialDis.id, formatId: formatA3.id, density: 250}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 75.75}));
+  await Paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 115}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 2.47}));
+  await Paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 150}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 2.67}));
+  await Paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 170}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 3.09}));
+  await Paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 200}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 4.14}));
+  await Paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 300}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 5.19}));
+  await Paper.create({materialId: materialKar.id, formatId: formatA3.id, density: 300}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 7.06}));
 
-  let workOf = await work.create({name: 'Офсетная печать'})//.then(w => {
-    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1, price: 4.23})
-    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1001, price: 2.75})
-    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 2001, price: 1.85})
+  let workOf = await Work.create({name: 'Офсетная печать'})//.then(w => {
+    WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1, price: 4.23})
+    WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1001, price: 2.75})
+    WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 2001, price: 1.85})
 
-    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1, price: 5.09})
-    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1001, price: 3.30})
-    workPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 2001, price: 2.21})
+    WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1, price: 5.09})
+    WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1001, price: 3.30})
+    WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 2001, price: 2.21})
   //});
-  await work.create({name: 'Цифровая печать'});
-  await work.create({name: 'Широкоформатная печать'});
-  await work.create({name: 'Шелкография'});
+  await Work.create({name: 'Цифровая печать'});
+  await Work.create({name: 'Широкоформатная печать'});
+  await Work.create({name: 'Шелкография'});
 
-  await work.create({name: 'Ламинация пакетная', postPressBlock: 1, postPressBlock: 1});
-  await work.create({name: 'Ламинация рулонная', postPressBlock: 1, postPressBlock: 1});
-  await work.create({name: 'Вырубка', postPressBlock: 1, postPressBlock: 1});
-  await work.create({name: 'Счёт листов', postPressBlock: 1, postPressBlock: 1});
+  await Work.create({name: 'Ламинация пакетная', postPressBlock: 1, postPressBlock: 1});
+  await Work.create({name: 'Ламинация рулонная', postPressBlock: 1, postPressBlock: 1});
+  await Work.create({name: 'Вырубка', postPressBlock: 1, postPressBlock: 1});
+  await Work.create({name: 'Счёт листов', postPressBlock: 1, postPressBlock: 1});
 
   // let newFormats = [
   //   {name: 'А0', width: 1189, height: 841},
