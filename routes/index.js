@@ -1,12 +1,12 @@
 const express = require("express"),
-router = express.Router(),
-orderRoutes = require("./order.routes");
-divisionRoutes = require("./division.routes");
-contactRoutes = require("./contact.routes");
-handbookRoutes = require("./handbook.routes");
-paperRoutes = require("./paper.routes");
-workRoutes = require("./work.routes");
-equipmentRoutes = require("./equipment.routes");
+  router = express.Router(),
+  orderRoutes = require("./order.routes"),
+  divisionRoutes = require("./division.routes"),
+  contactRoutes = require("./contact.routes"),
+  handbookRoutes = require("./handbook.routes"),
+  paperRoutes = require("./paper.routes"),
+  workRoutes = require("./work.routes"),
+  equipmentRoutes = require("./equipment.routes");
 
 router.use(async (req, res, next) => {
   console.log('index.js');

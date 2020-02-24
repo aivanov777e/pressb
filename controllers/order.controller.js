@@ -4,8 +4,20 @@ const Op = Sequelize.Op
 const Order = sequelize.models.order
 const OrderPress = sequelize.models.orderPress
 const Contact = sequelize.models.contact
+const Work = sequelize.models.work
 // const OrderService = require('../services/order.service');
 var moment = require('moment');
+
+async function getOrderById(id) {
+  return await Order.findByPk(id, {
+    include: [
+      { all: true, nested: false },
+      { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+      { association: Order.Block, include: [{ model: Contact}]},
+      { association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
+    ]    
+  });
+}
     
 class OrderController {
   async getOrder(req, res){
@@ -16,17 +28,23 @@ class OrderController {
         const dataLast = await sequelize.models.order.findOne({ order: [['regDate', 'DESC']], raw: true });
         data = {number: +dataLast.number + 1, regDate: moment()}
       } else {
-        data = await sequelize.models.order.findByPk(req.query.id, {
-          include: [
-            { all: true, nested: false },
-            { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-            { association: Order.Block, include: [{ model: Contact}]}
-          ]    
-        });
+        // data = await sequelize.models.order.findByPk(req.query.id, {
+        //   include: [
+        //     { all: true, nested: false },
+        //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+        //     { association: Order.Block, include: [{ model: Contact}]},
+        //     { association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
+        //   ]    
+        // });
+        data = await getOrderById(req.query.id);
       }
     } else {
-      //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
-      data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: false }] });
+      data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [
+        { association: Order.Division },
+        { association: Order.Subdivision },
+        { association: Order.Contact }
+      ]});
+      //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: false }] });
       console.log(data);
       console.log(JSON.stringify(data))
       //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
@@ -45,7 +63,7 @@ class OrderController {
 
   //  return res.status(200).send({data: req.order});
   }
-  
+
   async createAssociations(body) {
     console.log('createAssociations');
     if (!body.division.id) {
@@ -74,12 +92,13 @@ class OrderController {
       const contact = await sequelize.models.contact.create(newContact);
       //console.log(contact);
       body.contactId = contact.id;
-    } else if (body.contactId) {
+    } else if (body.contactId && body.contact && body.contactTel !== body.contact.tel ) {
       // Если надо обновим телефон
       const tel = body.contactTel || '';
-      let up = await sequelize.models.contact.update(
+      let up = await Contact.update(
         {tel: tel},
-        {where: {id: body.contactId, [Op.or]:[{tel: {[Op.ne]: tel}}, {tel: {[Op.is]: null}}]}}
+        //{where: {id: body.contactId, [Op.or]:[{tel: {[Op.ne]: tel}}, {tel: {[Op.is]: null}}]}}
+        {where: {id: body.contactId}}
       );
       console.log(up);
     }
@@ -108,13 +127,14 @@ class OrderController {
     let newOrder = await Order.create(req.body, { include: [{ association: Order.Cover }, { association: Order.Block }] });//
 
     //let data = await sequelize.models.order.findByPk(newOrder.id, {include: [{ all: true, nested: false }]});
-    let data = await sequelize.models.order.findByPk(newOrder.id, {
-      include: [
-        { all: true, nested: false },
-        { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-        { association: Order.Block, include: [{ model: Contact}]}
-      ]
-    });
+    // let data = await sequelize.models.order.findByPk(newOrder.id, {
+    //   include: [
+    //     { all: true, nested: false },
+    //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+    //     { association: Order.Block, include: [{ model: Contact}]}
+    //   ]
+    // });
+    const data = await getOrderById(newOrder.id);
     return res.status(200).send(data);
   }
   //  async createOrder(req, res){
@@ -136,7 +156,7 @@ class OrderController {
   
   async updateOrder(req, res) {
     console.log('updateOrder');
-    console.log(req.body.block);
+    console.log(req.body);
 
     await module.exports.createAssociations(req.body);
 
@@ -144,13 +164,14 @@ class OrderController {
     await OrderPress.update(req.body.cover, { where: { id: req.body.cover.id } });
     await OrderPress.update(req.body.block, { where: { id: req.body.block.id } });
     //let data = await sequelize.models.order.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
-    let data = await sequelize.models.order.findByPk(req.body.id, {
-      include: [
-        { all: true, nested: false },
-        { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-        { association: Order.Block, include: [{ model: Contact}]}
-      ]
-    });
+    // let data = await sequelize.models.order.findByPk(req.body.id, {
+    //   include: [
+    //     { all: true, nested: false },
+    //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+    //     { association: Order.Block, include: [{ model: Contact}]}
+    //   ]
+    // });
+    const data = await getOrderById(req.body.id);
     return res.status(200).send(data);
   }
   //  async updateOrder(req, res){
