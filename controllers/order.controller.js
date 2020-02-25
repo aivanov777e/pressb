@@ -3,6 +3,7 @@ const sequelize = require('../services/db.service');
 const Op = Sequelize.Op
 const Order = sequelize.models.order
 const OrderPress = sequelize.models.orderPress
+const OrderPostPress = sequelize.models.orderPostPress
 const Contact = sequelize.models.contact
 const Work = sequelize.models.work
 // const OrderService = require('../services/order.service');
@@ -12,9 +13,9 @@ async function getOrderById(id) {
   return await Order.findByPk(id, {
     include: [
       { all: true, nested: false },
-      { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-      { association: Order.Block, include: [{ model: Contact}]},
-      { association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
+      { model: OrderPress, as: 'cover', include: [{ model: Contact}, { association: OrderPress.PostPress, include: [{ model: Contact}, { model: Work}]}]},
+      { association: Order.Block, include: [{ model: Contact}, { association: OrderPress.PostPress, include: [{ model: Contact}, { model: Work}]}]},
+      //{ association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
     ]    
   });
 }
@@ -163,6 +164,20 @@ class OrderController {
     await sequelize.models.order.update(req.body, { where: { id: req.body.id } });
     await OrderPress.update(req.body.cover, { where: { id: req.body.cover.id } });
     await OrderPress.update(req.body.block, { where: { id: req.body.block.id } });
+
+    const pp = req.body.cover.postPress.concat(req.body.block.postPress);
+    console.log(pp);
+
+    const ppiu = pp.filter(v => v.crud === 'i' || v.crud === 'u');
+    if (ppiu.length) {
+      await OrderPostPress.bulkCreate(ppiu, {updateOnDuplicate: ['option', 'price', 'contactId', 'workId']});
+    }
+
+    const ppd = pp.filter(v => v.crud === 'd').map(v => v.id);
+    if (ppd.length) {
+      await OrderPostPress.destroy({where: {id: ppd}});
+    }
+
     //let data = await sequelize.models.order.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
     // let data = await sequelize.models.order.findByPk(req.body.id, {
     //   include: [

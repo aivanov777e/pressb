@@ -196,7 +196,7 @@ let OrderPostPress = sequelize.define('orderPostPress', {
     primaryKey: true,
     //allowNull: false,
   },
-  workType: Sequelize.ENUM('cover', 'block'),
+  //workType: Sequelize.ENUM('cover', 'block'),
   // count: Sequelize.INTEGER,
   // countAdj: Sequelize.INTEGER,
   // color1: Sequelize.INTEGER,
@@ -256,7 +256,8 @@ Order.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 Order.Cover = Order.belongsTo(OrderPress, {foreignKey: 'coverId', as: 'cover', sourceKey: 'id'});
 Order.Block = Order.belongsTo(OrderPress, {foreignKey: 'blockId', as: 'block', sourceKey: 'id'});
 
-Order.PostPress = Order.hasMany(OrderPostPress, {as: 'postPress'});
+//Order.PostPress = Order.hasMany(OrderPostPress, {as: 'postPress'});
+OrderPress.PostPress = OrderPress.hasMany(OrderPostPress, {as: 'postPress'});
 
 OrderPress.belongsTo(Contact, {foreignKey: 'contactId', sourceKey: 'id'});
 OrderPress.belongsTo(Equipment, {foreignKey: 'equipmentId', sourceKey: 'id'});

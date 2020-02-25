@@ -170,16 +170,16 @@ async function createTestData() {
       number: '123',
       divisionId: divisionTest.id,
       contactId: contactTest.id,
-      cover: {equipmentId: equipmentRol.id},
+      cover: {equipmentId: equipmentRol.id, postPress: [{contactId: contactBol.id, workId: workLam.id}]},
       block: {},
-      postPress: [
-        {workType: 'cover', contactId: contactBol.id, workId: workLam.id},
-        {workType: 'cover', contactId: contactIva.id, workId: workVyr.id},
-        {workType: 'block', contactId: contactIva.id, workId: workSch.id}]
+      // postPress: [
+      //   {workType: 'cover', contactId: contactBol.id, workId: workLam.id},
+      //   {workType: 'cover', contactId: contactIva.id, workId: workVyr.id},
+      //   {workType: 'block', contactId: contactIva.id, workId: workSch.id}]
     },{ include: [
-      { association: Order.Cover }, 
-      { association: Order.Block },
-      { association: Order.PostPress }] 
+      { association: Order.Cover, include: [{ association: OrderPress.PostPress }] }, 
+      { association: Order.Block, include: [{ association: OrderPress.PostPress }] }]
+      //{ association: Order.PostPress }] 
     }
   );
 
