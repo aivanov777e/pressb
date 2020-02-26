@@ -6,63 +6,67 @@ const Op = Sequelize.Op
 var moment = require('moment');
     
 class PaperController {
-  async getPaper(req, res){
-    console.log('getPaper');
-    //console.log(req.query.at);
-    const at = moment(req.query.at)//.toDate();
-    //console.log(at);
-    let data;
-    if (req.query.id) {
-      if (req.query.id === '-1') {
-        //const dataLast = await sequelize.models.paper.findOne({ order: [['regDate', 'DESC']], raw: true });
-        data = {}
+  async getPaper(req, res, next){
+    try {
+      console.log('getPaper');
+      //console.log(req.query.at);
+      const at = moment(req.query.at)//.toDate();
+      //console.log(at);
+      let data;
+      if (req.query.id) {
+        if (req.query.id === '-1') {
+          //const dataLast = await sequelize.models.paper.findOne({ order: [['regDate', 'DESC']], raw: true });
+          data = {}
+        } else {
+          data = await sequelize.models.paper.findByPk(req.query.id, {include: [{ all: true, nested: false }]});
+        }
+      } else if (req.query.formatId && req.query.materialId) {
+        data = await sequelize.models.paper.findAll({ 
+          order: [['density', 'ASC']], 
+          raw: true, 
+          where: { 'formatId': req.query.formatId, 'materialId': req.query.materialId },
+          include: [
+            { model: sequelize.models.paperPrice, 
+              nested: false, 
+              required: false,
+              where: { 
+                'startDate': { [Op.lte]: at }, 
+                [Op.or]: [
+                  {'endDate': { [Op.gt]: at }},
+                  {'endDate': { [Op.is ]: null}}
+                ]
+              }
+            }
+          ] 
+        });
       } else {
-        data = await sequelize.models.paper.findByPk(req.query.id, {include: [{ all: true, nested: false }]});
+        //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
+        data = await sequelize.models.paper.findAll({ 
+          order: [['material', 'name', 'ASC'], ['format', 'name', 'ASC'], ['density', 'ASC']], 
+          raw: true, 
+          include: [
+            { all: true, nested: false },
+            { model: sequelize.models.paperPrice, 
+              nested: false, 
+              required: false,
+              where: { 
+                'startDate': { [Op.lte]: at }, 
+                [Op.or]: [
+                  {'endDate': { [Op.gt]: at }},
+                  {'endDate': { [Op.is ]: null}}
+                ]
+              }
+            }
+          ] 
+        });
+        //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
       }
-    } else if (req.query.formatId && req.query.materialId) {
-      data = await sequelize.models.paper.findAll({ 
-        order: [['density', 'ASC']], 
-        raw: true, 
-        where: { 'formatId': req.query.formatId, 'materialId': req.query.materialId },
-        include: [
-          { model: sequelize.models.paperPrice, 
-            nested: false, 
-            required: false,
-            where: { 
-              'startDate': { [Op.lte]: at }, 
-              [Op.or]: [
-                {'endDate': { [Op.gt]: at }},
-                {'endDate': { [Op.is ]: null}}
-              ]
-            }
-          }
-        ] 
-      });
-    } else {
-      //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
-      data = await sequelize.models.paper.findAll({ 
-        order: [['material', 'name', 'ASC'], ['format', 'name', 'ASC'], ['density', 'ASC']], 
-        raw: true, 
-        include: [
-          { all: true, nested: false },
-          { model: sequelize.models.paperPrice, 
-            nested: false, 
-            required: false,
-            where: { 
-              'startDate': { [Op.lte]: at }, 
-              [Op.or]: [
-                {'endDate': { [Op.gt]: at }},
-                {'endDate': { [Op.is ]: null}}
-              ]
-            }
-          }
-        ] 
-      });
-      //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
+      //console.log(data);
+      //console.log(JSON.stringify(data))
+      return res.status(200).send(data);
+    } catch (err) {
+      next(err);
     }
-    //console.log(data);
-    //console.log(JSON.stringify(data))
-    return res.status(200).send(data);
   }
 
   async createPaper(req, res){

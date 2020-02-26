@@ -21,37 +21,42 @@ async function getOrderById(id) {
 }
     
 class OrderController {
-  async getOrder(req, res){
-    console.log('getOrder');
-    let data;
-    if (req.query.id) {
-      if (req.query.id === '-1') {
-        const dataLast = await sequelize.models.order.findOne({ order: [['regDate', 'DESC']], raw: true });
-        data = {number: +dataLast.number + 1, regDate: moment()}
+  async getOrder(req, res, next){
+    try {
+      console.log('getOrder');
+      let data;
+      if (req.query.id) {
+        if (req.query.id === '-1') {
+          const dataLast = await sequelize.models.order.findOne({ order: [['regDate', 'DESC']], raw: true });
+          data = {number: +dataLast.number + 1, regDate: moment()}
+        } else {
+          // data = await sequelize.models.order.findByPk(req.query.id, {
+          //   include: [
+          //     { all: true, nested: false },
+          //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+          //     { association: Order.Block, include: [{ model: Contact}]},
+          //     { association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
+          //   ]    
+          // });
+          data = await getOrderById(req.query.id);
+        }
       } else {
-        // data = await sequelize.models.order.findByPk(req.query.id, {
-        //   include: [
-        //     { all: true, nested: false },
-        //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-        //     { association: Order.Block, include: [{ model: Contact}]},
-        //     { association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
-        //   ]    
-        // });
-        data = await getOrderById(req.query.id);
+        data = await sequelize.models.order.findAll({ order: [['regDate1', 'DESC']], raw: true, include: [
+          { association: Order.Division },
+          { association: Order.Subdivision },
+          { association: Order.Contact }
+        ]});
+        //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: false }] });
+        console.log(data);
+        console.log(JSON.stringify(data))
+        //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
       }
-    } else {
-      data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [
-        { association: Order.Division },
-        { association: Order.Subdivision },
-        { association: Order.Contact }
-      ]});
-      //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: false }] });
-      console.log(data);
-      console.log(JSON.stringify(data))
-      //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
+      return res.status(200).send(data);
+    } catch (err) {
+      //return res.status(500).send({message: `Ошибка получения данных ${e.message}`});
+      //return res.status(500).send(e);
+      next(err);
     }
-    return res.status(200).send(data);
-
 
 
   //  if(req.query.id){
