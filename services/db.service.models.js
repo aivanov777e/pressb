@@ -107,6 +107,15 @@ let PaperPrice = sequelize.define('paperPrice', {
   price: Sequelize.DECIMAL(10, 2),
 }, {});
 
+let PostPressType = sequelize.define('postPressType', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    //allowNull: false,
+  },
+  name: Sequelize.STRING,
+}, {});
+
 let Work = sequelize.define('work', {
   id: {
     type: Sequelize.UUID,
@@ -115,9 +124,12 @@ let Work = sequelize.define('work', {
     //allowNull: false,
   },
   name: Sequelize.STRING,
-  //postPress: Sequelize.INTEGER, // 0 нет, 1 блок, 2 обложка
-  postPressCover: Sequelize.BOOLEAN,
-  postPressBlock: Sequelize.BOOLEAN,
+  // postPress: {
+  //   type: Sequelize.INTEGER, // -1 нет, 0 да, 1 только блок, 2 только обложка
+  //   defaultValue: -1
+  // }
+  // postPressCover: Sequelize.BOOLEAN,
+  // postPressBlock: Sequelize.BOOLEAN,
 }, {});
 
 let WorkPrice = sequelize.define('workPrice', {
@@ -223,6 +235,7 @@ Work.hasMany(WorkPrice);
 WorkPrice.belongsTo(Work);
 WorkPrice.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 
+Work.PostPressType = Work.belongsTo(PostPressType);
 
 Division.hasMany(Subdivision);
 

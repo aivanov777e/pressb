@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../services/db.service');
 const Op = Sequelize.Op
 var moment = require('moment');
+const PostPressType = sequelize.models.postPressType
 
 class HandbookController {
   async getFormat(req, res){
@@ -89,6 +90,15 @@ class HandbookController {
       });
     }
     return res.status(200).send(data);
+  }
+
+  async getPostPressType(req, res, next) {
+    try {
+      const data = await PostPressType.findAll({order: [['id', 'ASC']]});
+      return res.status(200).send(data);
+    } catch (err) {
+      next(err);
+    }
   }
 }
 

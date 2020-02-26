@@ -7,7 +7,8 @@ const Paper = sequelize.models.paper
 const PaperPrice = sequelize.models.paperPrice
 const Work = sequelize.models.work
 const WorkPrice = sequelize.models.workPrice
-
+const PostPressType = sequelize.models.postPressType
+const Format = sequelize.models.format
 
 sequelize.sync({ force: true }).then(result=>{
   console.log(result);  
@@ -25,22 +26,22 @@ async function createTestData() {
   const contactMon = await Contact.create({name: 'Моносян З.Г.'});
 
 
-  let formatA0 = await sequelize.models.format.create({name: 'А0', width: 1189, height: 841});
-  let formatA1 = await sequelize.models.format.create({name: 'А1', width: 841, height: 594});
-  let formatA2 = await sequelize.models.format.create({name: 'А2', width: 594, height: 420});
-  let formatA3 = await sequelize.models.format.create({name: 'А3', width: 420, height: 297});
-  let formatA4 = await sequelize.models.format.create({name: 'А4', width: 297, height: 210});
-  let formatA5 = await sequelize.models.format.create({name: 'А5', width: 210, height: 148});
-  let formatA6 = await sequelize.models.format.create({name: 'А6', width: 148, height: 105});
-  let formatA7 = await sequelize.models.format.create({name: 'А7', width: 105, height: 74});
-  let format300 = await sequelize.models.format.create({name: 'Рулон 300 мм', width: 300});
-  let format420 = await sequelize.models.format.create({name: 'Рулон 420 мм', width: 420});
-  let format841 = await sequelize.models.format.create({name: 'Рулон 841 мм', width: 841});
-  let format1000 = await sequelize.models.format.create({name: 'Рулон 1000 мм', width: 1000});
-  let format1250 = await sequelize.models.format.create({name: 'Рулон 1250 мм', width: 1250});
-  let format1360 = await sequelize.models.format.create({name: 'Рулон 1360 мм', width: 1360});
-  let format1500 = await sequelize.models.format.create({name: 'Рулон 1500 мм', width: 1500});
-  let format1600 = await sequelize.models.format.create({name: 'Рулон 1600 мм', width: 1600});
+  let formatA0 = await Format.create({name: 'А0', width: 1189, height: 841});
+  let formatA1 = await Format.create({name: 'А1', width: 841, height: 594});
+  let formatA2 = await Format.create({name: 'А2', width: 594, height: 420});
+  let formatA3 = await Format.create({name: 'А3', width: 420, height: 297});
+  let formatA4 = await Format.create({name: 'А4', width: 297, height: 210});
+  let formatA5 = await Format.create({name: 'А5', width: 210, height: 148});
+  let formatA6 = await Format.create({name: 'А6', width: 148, height: 105});
+  let formatA7 = await Format.create({name: 'А7', width: 105, height: 74});
+  let format300 = await Format.create({name: 'Рулон 300 мм', width: 300});
+  let format420 = await Format.create({name: 'Рулон 420 мм', width: 420});
+  let format841 = await Format.create({name: 'Рулон 841 мм', width: 841});
+  let format1000 = await Format.create({name: 'Рулон 1000 мм', width: 1000});
+  let format1250 = await Format.create({name: 'Рулон 1250 мм', width: 1250});
+  let format1360 = await Format.create({name: 'Рулон 1360 мм', width: 1360});
+  let format1500 = await Format.create({name: 'Рулон 1500 мм', width: 1500});
+  let format1600 = await Format.create({name: 'Рулон 1600 мм', width: 1600});
 
   let materialOfs = await sequelize.models.material.create({name: 'Офсет'});
   let materialVHI = await sequelize.models.material.create({name: 'ВХИ'});
@@ -72,7 +73,12 @@ async function createTestData() {
   await Paper.create({materialId: materialMel.id, formatId: formatA3.id, density: 300}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 5.19}));
   await Paper.create({materialId: materialKar.id, formatId: formatA3.id, density: 300}).then(p => PaperPrice.create({paperId: p.id, startDate: new Date(Date.UTC(2019, 0, 1)), price: 7.06}));
 
-  let workOf = await Work.create({name: 'Офсетная печать'})//.then(w => {
+  await PostPressType.create({id: 0, name: 'Нет'});
+  await PostPressType.create({id: 1, name: 'Только обложка'});
+  await PostPressType.create({id: 2, name: 'Только блок'});
+  await PostPressType.create({id: 3, name: 'Да'});
+
+  let workOf = await Work.create({name: 'Офсетная печать', postPressTypeId: 0})//.then(w => {
     WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1, price: 4.23})
     WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 1001, price: 2.75})
     WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 0, countFrom: 2001, price: 1.85})
@@ -81,14 +87,14 @@ async function createTestData() {
     WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1001, price: 3.30})
     WorkPrice.create({workId: workOf.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 2001, price: 2.21})
   //});
-  await Work.create({name: 'Цифровая печать'});
-  await Work.create({name: 'Широкоформатная печать'});
-  await Work.create({name: 'Шелкография'});
+  await Work.create({name: 'Цифровая печать', postPressTypeId: 0});
+  await Work.create({name: 'Широкоформатная печать', postPressTypeId: 0});
+  await Work.create({name: 'Шелкография', postPressTypeId: 0});
 
-  let workLam = await Work.create({name: 'Ламинация пакетная', postPressBlock: 1, postPressBlock: 1});
-  await Work.create({name: 'Ламинация рулонная', postPressBlock: 1, postPressBlock: 1});
-  let workVyr = await Work.create({name: 'Вырубка', postPressBlock: 1, postPressBlock: 1});
-  let workSch = await Work.create({name: 'Счёт листов', postPressBlock: 1, postPressBlock: 1});
+  let workLam = await Work.create({name: 'Ламинация пакетная', postPressTypeId: 3});
+  await Work.create({name: 'Ламинация рулонная', postPressTypeId: 3});
+  let workVyr = await Work.create({name: 'Вырубка', postPressTypeId: 1});
+  let workSch = await Work.create({name: 'Счёт листов', postPressTypeId: 2});
 
   // let newFormats = [
   //   {name: 'А0', width: 1189, height: 841},
@@ -108,7 +114,7 @@ async function createTestData() {
   //   {name: 'Рулон 1500 мм', width: 1500},
   //   {name: 'Рулон 1600 мм', width: 1600},
   // ]
-  // await sequelize.models.format.bulkCreate(newFormats);
+  // await Format.bulkCreate(newFormats);
 
   let equipmentRol = await sequelize.models.equipment.create({name: 'Роланд', workId: workOf.id});
   let equipmentHam = await sequelize.models.equipment.create({name: 'Хамада', workId: workOf.id});

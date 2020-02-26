@@ -69,30 +69,42 @@ class PaperController {
     }
   }
 
-  async createPaper(req, res){
-    console.log('createPaper');
-    //console.log(req);
-    let newPaper = await sequelize.models.paper.create(req.body);
-    let data = await sequelize.models.paper.findByPk(newPaper.id, {include: [{ all: true, nested: false }]});
-    return res.status(200).send(data);
+  async createPaper(req, res, next){
+    try {
+      console.log('createPaper');
+      //console.log(req);
+      let newPaper = await sequelize.models.paper.create(req.body);
+      let data = await sequelize.models.paper.findByPk(newPaper.id, {include: [{ all: true, nested: false }]});
+      return res.status(200).send(data);
+    } catch (err) {
+      next(err);
+    }
   }
 
-  async updatePaper(req, res) {
-    console.log('updatePaper');
-    //console.log(req);
-    //await sequelize.models.paper.update(req.body, { where: { id: req.body.id } });
-    await sequelize.transaction({isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async tran => {
-      await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} }, transaction: tran });
-      await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices, { transaction: tran });
-    }).then(async result => {
+  async updatePaper(req, res, next) {
+    try {
+      console.log('updatePaper');
+      //console.log(req);
+      //await sequelize.models.paper.update(req.body, { where: { id: req.body.id } });
+      await sequelize.transaction({isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async tran => {
+        await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} }, transaction: tran });
+        await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices, { transaction: tran });
+      })
+      // .then(async result => {
+      //   let data = await sequelize.models.paper.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
+      //   return res.status(200).send(data);
+      //     // transaction has been committed. Do something after the commit if required.
+      // }).catch(err => {
+      //   return res.status(400).send(err);
+      // });
+      // await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} } });
+      // await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices);
+
       let data = await sequelize.models.paper.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
       return res.status(200).send(data);
-        // transaction has been committed. Do something after the commit if required.
-    }).catch(err => {
-      return res.status(400).send(err);
-    });
-    // await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} } });
-    // await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices);
+    } catch (err) {
+      next(err);
+    }
   }
 }
     

@@ -41,7 +41,7 @@ class OrderController {
           data = await getOrderById(req.query.id);
         }
       } else {
-        data = await sequelize.models.order.findAll({ order: [['regDate1', 'DESC']], raw: true, include: [
+        data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [
           { association: Order.Division },
           { association: Order.Subdivision },
           { association: Order.Contact }
@@ -124,24 +124,28 @@ class OrderController {
     }
   }
 
-  async createOrder(req, res){
-    console.log('createOrder');
-    console.log(req.body);
+  async createOrder(req, res, next){
+    try {
+      console.log('createOrder');
+      console.log(req.body);
 
-    await module.exports.createAssociations(req.body);
+      await module.exports.createAssociations(req.body);
 
-    let newOrder = await Order.create(req.body, { include: [{ association: Order.Cover }, { association: Order.Block }] });//
+      let newOrder = await Order.create(req.body, { include: [{ association: Order.Cover }, { association: Order.Block }] });//
 
-    //let data = await sequelize.models.order.findByPk(newOrder.id, {include: [{ all: true, nested: false }]});
-    // let data = await sequelize.models.order.findByPk(newOrder.id, {
-    //   include: [
-    //     { all: true, nested: false },
-    //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-    //     { association: Order.Block, include: [{ model: Contact}]}
-    //   ]
-    // });
-    const data = await getOrderById(newOrder.id);
-    return res.status(200).send(data);
+      //let data = await sequelize.models.order.findByPk(newOrder.id, {include: [{ all: true, nested: false }]});
+      // let data = await sequelize.models.order.findByPk(newOrder.id, {
+      //   include: [
+      //     { all: true, nested: false },
+      //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+      //     { association: Order.Block, include: [{ model: Contact}]}
+      //   ]
+      // });
+      const data = await getOrderById(newOrder.id);
+      return res.status(200).send(data);
+    } catch (err) {
+      next(err);
+    }
   }
   //  async createOrder(req, res){
   //    if(req.body.order && req.body.order.id){
@@ -160,39 +164,43 @@ class OrderController {
   //      return res.status(400).send({message: 'Bad request.'});
   //  }
   
-  async updateOrder(req, res) {
-    console.log('updateOrder');
-    console.log(req.body);
+  async updateOrder(req, res, next) {
+    try {
+      console.log('updateOrder');
+      console.log(req.body);
 
-    await module.exports.createAssociations(req.body);
+      await module.exports.createAssociations(req.body);
 
-    await sequelize.models.order.update(req.body, { where: { id: req.body.id } });
-    await OrderPress.update(req.body.cover, { where: { id: req.body.cover.id } });
-    await OrderPress.update(req.body.block, { where: { id: req.body.block.id } });
+      await sequelize.models.order.update(req.body, { where: { id: req.body.id } });
+      await OrderPress.update(req.body.cover, { where: { id: req.body.cover.id } });
+      await OrderPress.update(req.body.block, { where: { id: req.body.block.id } });
 
-    const pp = req.body.cover.postPress.concat(req.body.block.postPress);
-    console.log(pp);
+      const pp = req.body.cover.postPress.concat(req.body.block.postPress);
+      console.log(pp);
 
-    const ppiu = pp.filter(v => v.crud === 'i' || v.crud === 'u');
-    if (ppiu.length) {
-      await OrderPostPress.bulkCreate(ppiu, {updateOnDuplicate: ['option', 'price', 'contactId', 'workId']});
+      const ppiu = pp.filter(v => v.crud === 'i' || v.crud === 'u');
+      if (ppiu.length) {
+        await OrderPostPress.bulkCreate(ppiu, {updateOnDuplicate: ['option', 'price', 'contactId', 'workId']});
+      }
+
+      const ppd = pp.filter(v => v.crud === 'd').map(v => v.id);
+      if (ppd.length) {
+        await OrderPostPress.destroy({where: {id: ppd}});
+      }
+
+      //let data = await sequelize.models.order.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
+      // let data = await sequelize.models.order.findByPk(req.body.id, {
+      //   include: [
+      //     { all: true, nested: false },
+      //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
+      //     { association: Order.Block, include: [{ model: Contact}]}
+      //   ]
+      // });
+      const data = await getOrderById(req.body.id);
+      return res.status(200).send(data);
+    } catch (err) {
+      next(err);
     }
-
-    const ppd = pp.filter(v => v.crud === 'd').map(v => v.id);
-    if (ppd.length) {
-      await OrderPostPress.destroy({where: {id: ppd}});
-    }
-
-    //let data = await sequelize.models.order.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
-    // let data = await sequelize.models.order.findByPk(req.body.id, {
-    //   include: [
-    //     { all: true, nested: false },
-    //     { model: OrderPress, as: 'cover', include: [{ model: Contact}]},
-    //     { association: Order.Block, include: [{ model: Contact}]}
-    //   ]
-    // });
-    const data = await getOrderById(req.body.id);
-    return res.status(200).send(data);
   }
   //  async updateOrder(req, res){
   //    if(req.body.order && req.body.order.id){
