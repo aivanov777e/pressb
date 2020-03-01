@@ -87,12 +87,12 @@ async function updatePressPrice(press) {
   const cnt = (+press.count || 0) + (+press.countAdj || 0);
   press.pricePaper = cnt * +paper.price;
 
-  const wp = await WorkPrice.findAll({
+  const wps = await WorkPrice.findAll({
     where: { color1: press.color1, color2: press.color2, 
       [Op.or]: [{formatId: press.formatId}, {formatId: {[Op.is]: null}}], 
       [Op.or]: [{countFrom: {[Op.lt]: cnt}}, {countFrom: {[Op.is]: null}}]
     },
-    order: [['countFrom', 'DESC']],
+    order: [['countFrom', 'DESC'], ['formatId', 'ASC']],
     //include: [{model: Equipment, where: {id: press.equipmentId, workId: sequelize.col('workPrices.workId')}}]
     include: [
       {association: WorkPrice.Work, required: true, include: [
@@ -100,24 +100,47 @@ async function updatePressPrice(press) {
       ]}
     ]
   });
-  if (wp.length) {
-    let p = wp[0], p0 = {price: 0};
-    if (p.countFrom === null && wp.length > 1) {
-      p0 = p;
-      p = wp[1]
-    }
-    press.pricePress = +p0.price + (+p.price * cnt);
-  }
+  let p, p0;
+  wps.forEach(async wp => {
+    if (!p0 && !wp.countFrom) {p0 = wp}
+    if (!p && wp.countFrom) {p = wp}
+  })
+  press.pricePress = (p0 ? +p0.price : 0) + ((p ? +p.price : 0) * cnt)
 
-//   data = await sequelize.query(`
-//   select *  from "workPrices" wp
-//     inner join "equipment" e on wp."workId" = e."workId"
-//     where e.id = '` + press.equipmentId + `'
-//       and wp."formatId" = '` + press.formatId + `'
-//     order by 1`
-// , { type: sequelize.QueryTypes.SELECT });
+  // if (wp.length) {
+  //   let p = wp[0], p0 = {price: 0};
+  //   if (p.countFrom === null && wp.length > 1) {
+  //     p0 = p;
+  //     p = wp[1]
+  //   }
+  //   press.pricePress = +p0.price + (+p.price * cnt);
+  // }
+
+  press.postPress.forEach(async pp => {
+    await updatePostPressPrice(pp, cnt);
+  });
 }
 
+async function updatePostPressPrice(pp, cnt) {
+  const wps = await WorkPrice.findAll({
+    where: {
+      [Op.or]: [{color1: pp.color1}, {color1: {[Op.is]: null}}], 
+      [Op.or]: [{color2: pp.color2}, {color2: {[Op.is]: null}}], 
+      [Op.or]: [{formatId: pp.formatId}, {formatId: {[Op.is]: null}}], 
+      [Op.or]: [{countFrom: {[Op.lt]: cnt}}, {countFrom: {[Op.is]: null}}]
+    },
+    order: [['countFrom', 'DESC'], ['formatId', 'ASC'], ['color1', 'ASC'], ['color2', 'ASC']],
+    include: [
+      {association: WorkPrice.Work, where: {id: pp.workId}}
+    ]
+  });
+  let p, p0;
+  wps.forEach(async wp => {
+    if (!p0 && !wp.countFrom) {p0 = wp}
+    if (!p && wp.countFrom) {p = wp}
+  })
+  pp.price = (p0 ? +p0.price : 0) + ((p ? +p.price : 0) * cnt)
+}
 
 class OrderController {
   async getOrder(req, res, next){
@@ -224,7 +247,8 @@ class OrderController {
       const pp = req.body.cover.postPress.concat(req.body.block.postPress);
       console.log(pp);
 
-      const ppiu = pp.filter(v => v.crud === 'i' || v.crud === 'u');
+      //const ppiu = pp.filter(v => v.crud === 'i' || v.crud === 'u');
+      const ppiu = pp.filter(v => v.crud !== 'd');
       if (ppiu.length) {
         await OrderPostPress.bulkCreate(ppiu, {updateOnDuplicate: ['option', 'price', 'contactId', 'workId']});
       }
