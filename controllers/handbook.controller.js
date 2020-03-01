@@ -17,7 +17,7 @@ class HandbookController {
     }
     let data = await sequelize.models.format.findAll({
 //      include: [{ model: sequelize.models.equipment, as: 'equipments', through: 'equipmentFormat', where:{id: req.query.equipmentId}}]
-        attributes: ['id', 'name'],
+        //attributes: ['id', 'name'],
         include: includeEquipment,
         order: [['name', 'ASC']]
     });
@@ -42,7 +42,13 @@ class HandbookController {
         select distinct color1::text || '+' || color2 as "name", color1, color2 from "workPrices" wp
           inner join "equipment" e on wp."workId" = e."workId"
           where e.id = '` + req.query.equipmentId + `'
-            and wp."formatId" = '` + req.query.formatId + `'
+            and (wp."formatId" = '` + req.query.formatId + `' or wp."formatId" is null)
+          order by 1`
+      , { type: sequelize.QueryTypes.SELECT });
+    } else if (req.query.workId) {
+      data = await sequelize.query(`
+        select distinct color1::text || '+' || color2 as "name", color1, color2 from "workPrices" wp
+          where wp."workId" = '` + req.query.workId + `'
           order by 1`
       , { type: sequelize.QueryTypes.SELECT });
     }
@@ -68,18 +74,18 @@ class HandbookController {
           { model: sequelize.models.paper,
             attributes: [],
             where: {'formatId': req.query.formatId},
-            include: [
-              { model: sequelize.models.paperPrice, 
-                attributes: [],
-                where: { 
-                  'startDate': { [Op.lte]: at }, 
-                  [Op.or]: [
-                    {'endDate': { [Op.gt]: at }},
-                    {'endDate': { [Op.is ]: null}}
-                  ]
-                }
-              }
-            ]
+            // include: [
+            //   { model: sequelize.models.paperPrice, 
+            //     attributes: [],
+            //     where: { 
+            //       'startDate': { [Op.lte]: at }, 
+            //       [Op.or]: [
+            //         {'endDate': { [Op.gt]: at }},
+            //         {'endDate': { [Op.is ]: null}}
+            //       ]
+            //     }
+            //   }
+            // ]
           }
         ]
       });

@@ -3,14 +3,14 @@ const sequelize = require('../services/db.service');
 // const OrderService = require('../services/order.service');
 const Op = Sequelize.Op
 //import * as moment from 'moment';
-var moment = require('moment');
+//var moment = require('moment');
     
 class PaperController {
   async getPaper(req, res, next){
     try {
       console.log('getPaper');
       //console.log(req.query.at);
-      const at = moment(req.query.at)//.toDate();
+      //const at = moment(req.query.at)//.toDate();
       //console.log(at);
       let data;
       if (req.query.id) {
@@ -25,19 +25,19 @@ class PaperController {
           order: [['density', 'ASC']], 
           raw: true, 
           where: { 'formatId': req.query.formatId, 'materialId': req.query.materialId },
-          include: [
-            { model: sequelize.models.paperPrice, 
-              nested: false, 
-              required: false,
-              where: { 
-                'startDate': { [Op.lte]: at }, 
-                [Op.or]: [
-                  {'endDate': { [Op.gt]: at }},
-                  {'endDate': { [Op.is ]: null}}
-                ]
-              }
-            }
-          ] 
+          // include: [
+          //   { model: sequelize.models.paperPrice, 
+          //     nested: false, 
+          //     required: false,
+          //     where: { 
+          //       'startDate': { [Op.lte]: at }, 
+          //       [Op.or]: [
+          //         {'endDate': { [Op.gt]: at }},
+          //         {'endDate': { [Op.is ]: null}}
+          //       ]
+          //     }
+          //   }
+          // ] 
         });
       } else {
         //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ all: true, nested: true }] });
@@ -46,17 +46,17 @@ class PaperController {
           raw: true, 
           include: [
             { all: true, nested: false },
-            { model: sequelize.models.paperPrice, 
-              nested: false, 
-              required: false,
-              where: { 
-                'startDate': { [Op.lte]: at }, 
-                [Op.or]: [
-                  {'endDate': { [Op.gt]: at }},
-                  {'endDate': { [Op.is ]: null}}
-                ]
-              }
-            }
+            // { model: sequelize.models.paperPrice, 
+            //   nested: false, 
+            //   required: false,
+            //   where: { 
+            //     'startDate': { [Op.lte]: at }, 
+            //     [Op.or]: [
+            //       {'endDate': { [Op.gt]: at }},
+            //       {'endDate': { [Op.is ]: null}}
+            //     ]
+            //   }
+            // }
           ] 
         });
         //data = await sequelize.models.order.findAll({ order: [['regDate', 'DESC']], raw: true, include: [{ model: sequelize.models.division, as: 'division' }] });
@@ -74,7 +74,7 @@ class PaperController {
       console.log('createPaper');
       //console.log(req);
       let newPaper = await sequelize.models.paper.create(req.body);
-      let data = await sequelize.models.paper.findByPk(newPaper.id, {include: [{ all: true, nested: false }]});
+      let data = await sequelize.models.paper.findByPk(newPaper.id, {raw: true, include: [{ all: true, nested: false }]});
       return res.status(200).send(data);
     } catch (err) {
       next(err);
@@ -85,11 +85,12 @@ class PaperController {
     try {
       console.log('updatePaper');
       //console.log(req);
-      //await sequelize.models.paper.update(req.body, { where: { id: req.body.id } });
-      await sequelize.transaction({isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async tran => {
-        await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} }, transaction: tran });
-        await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices, { transaction: tran });
-      })
+      await sequelize.models.paper.update(req.body, { where: { id: req.body.id } });
+      // await sequelize.transaction({isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async tran => {
+      //   await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} }, transaction: tran });
+      //   await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices, { transaction: tran });
+      // })
+
       // .then(async result => {
       //   let data = await sequelize.models.paper.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
       //   return res.status(200).send(data);
@@ -100,7 +101,7 @@ class PaperController {
       // await sequelize.models.paperPrice.destroy({ where: { paperId: {[Op.eq]: req.body.id} } });
       // await sequelize.models.paperPrice.bulkCreate(req.body.paperPrices);
 
-      let data = await sequelize.models.paper.findByPk(req.body.id, {include: [{ all: true, nested: false }]});
+      let data = await sequelize.models.paper.findByPk(req.body.id, {raw: true, include: [{ all: true, nested: false }]});
       return res.status(200).send(data);
     } catch (err) {
       next(err);

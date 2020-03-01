@@ -1,11 +1,11 @@
-const Sequelize = require('sequelize');
+const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('./db.service');
 
 let Contact = sequelize.define('contact', {
   id: {
     primaryKey: true,
     allowNull: false,
-    type: Sequelize.UUID,
+    type: DataTypes.UUID,
     defaultValue: Sequelize.UUIDV1
   },
   name: {
@@ -82,30 +82,26 @@ let Paper = sequelize.define('paper', {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV1,
     primaryKey: true,
-    //allowNull: false,
   },
-  //name: Sequelize.STRING,
   density: Sequelize.INTEGER,
-  // price: Sequelize.DECIMAL(10, 2),
-  // startDate: Sequelize.DATE,
-  // endDate: Sequelize.DATE 
-}, {});
-
-let PaperPrice = sequelize.define('paperPrice', {
-  id: {
-    type: Sequelize.UUID,
-    defaultValue: Sequelize.UUIDV1,
-    primaryKey: true,
-    //allowNull: false,
-  },
-  paperId: {
-    type: Sequelize.UUID,
-    allowNull: false,
-  },
-  startDate: Sequelize.DATE,
-  endDate: Sequelize.DATE,
   price: Sequelize.DECIMAL(10, 2),
 }, {});
+
+// let PaperPrice = sequelize.define('paperPrice', {
+//   id: {
+//     type: Sequelize.UUID,
+//     defaultValue: Sequelize.UUIDV1,
+//     primaryKey: true,
+//     //allowNull: false,
+//   },
+//   paperId: {
+//     type: Sequelize.UUID,
+//     allowNull: false,
+//   },
+//   startDate: Sequelize.DATE,
+//   endDate: Sequelize.DATE,
+//   price: Sequelize.DECIMAL(10, 2),
+// }, {});
 
 let PostPressType = sequelize.define('postPressType', {
   id: {
@@ -172,9 +168,11 @@ let Order = sequelize.define('order', {
   regDate: Sequelize.DATE,
   name: Sequelize.STRING,
   number: Sequelize.STRING,
-  count: Sequelize.INTEGER,
+
+  countOfItem: Sequelize.INTEGER,
+  sheetsInItem : Sequelize.INTEGER,
   width: Sequelize.INTEGER,
-  heigth: Sequelize.INTEGER,
+  height: Sequelize.INTEGER,
   // coverCount: Sequelize.INTEGER,
   // blockCount: Sequelize.INTEGER,
   // coverCountAdj: Sequelize.INTEGER,
@@ -211,15 +209,17 @@ let OrderPostPress = sequelize.define('orderPostPress', {
   //workType: Sequelize.ENUM('cover', 'block'),
   // count: Sequelize.INTEGER,
   // countAdj: Sequelize.INTEGER,
-  // color1: Sequelize.INTEGER,
-  // color2: Sequelize.INTEGER,
+  color1: Sequelize.INTEGER,
+  color2: Sequelize.INTEGER,
   option: Sequelize.STRING,
   price: Sequelize.DECIMAL(10, 2),
 });
 
 let EquipmentFormat = sequelize.define('equipmentFormat');
 
-Equipment.belongsTo(Work);
+Equipment.Work = Equipment.belongsTo(Work);
+Work.Equipment = Work.hasMany(Equipment);
+
 Equipment.belongsToMany(Format, {through: 'equipmentFormat'});//, foreignKey: 'equipmentId'
 Format.belongsToMany(Equipment, {through: 'equipmentFormat'});//, foreignKey: 'formatId'
 Equipment.hasMany(EquipmentFormat);
@@ -228,12 +228,13 @@ Paper.belongsTo(Material, {foreignKey: 'materialId', sourceKey: 'id'});
 Material.hasMany(Paper);
 Paper.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 
-Paper.hasMany(PaperPrice);
-PaperPrice.belongsTo(Paper);
+//Paper.hasMany(PaperPrice);
+//PaperPrice.belongsTo(Paper);
 
-Work.hasMany(WorkPrice);
-WorkPrice.belongsTo(Work);
-WorkPrice.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
+Work.WorkPrice = Work.hasMany(WorkPrice);
+WorkPrice.Work = WorkPrice.belongsTo(Work);
+
+WorkPrice.Format = WorkPrice.belongsTo(Format, {foreignKey: 'formatId', sourceKey: 'id'});
 
 Work.PostPressType = Work.belongsTo(PostPressType);
 

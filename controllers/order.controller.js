@@ -6,6 +6,9 @@ const OrderPress = sequelize.models.orderPress
 const OrderPostPress = sequelize.models.orderPostPress
 const Contact = sequelize.models.contact
 const Work = sequelize.models.work
+const WorkPrice = sequelize.models.workPrice
+const Paper = sequelize.models.paper
+const Equipment = sequelize.models.equipment
 // const OrderService = require('../services/order.service');
 var moment = require('moment');
 
@@ -19,7 +22,103 @@ async function getOrderById(id) {
     ]    
   });
 }
-    
+
+async function createAssociations(body) {
+  console.log('createAssociations');
+  if (!body.division.id) {
+    // let division = await sequelize.models.division.create({name: body.division});
+    // body.divisionId = division.id;
+    const newDiv = {name: body.division}
+    const [division, created] = await sequelize.models.division.findOrCreate({where: newDiv, defaults: newDiv});
+    //console.log(division);
+    body.divisionId = division.id;
+  }
+
+  if (!body.subdivisionId && body.subdivision) {
+    const newSubDiv = {divisionId: body.divisionId, name: body.subdivision}
+    const [subdivision, created] = await sequelize.models.subdivision.findOrCreate({where: newSubDiv, defaults: newSubDiv});
+    //console.log(subdivision);
+    body.subdivisionId = subdivision.id;
+  }
+
+  if (!body.contactId && body.contact) {
+    const newContact = {
+      divisionId: body.subdivisionId || body.divisionId,
+      name: body.contact,
+      tel: body.contactTel || '',
+    }
+    //const [contact, created] = await sequelize.models.contact.findOrCreate({where: {divisionId: divisionId, name: body.contact.name}, defaults: body.contact});
+    const contact = await sequelize.models.contact.create(newContact);
+    //console.log(contact);
+    body.contactId = contact.id;
+  } else if (body.contactId && body.contact && body.contactTel !== body.contact.tel ) {
+    // Если надо обновим телефон
+    const tel = body.contactTel || '';
+    let up = await Contact.update(
+      {tel: tel},
+      //{where: {id: body.contactId, [Op.or]:[{tel: {[Op.ne]: tel}}, {tel: {[Op.is]: null}}]}}
+      {where: {id: body.contactId}}
+    );
+    console.log(up);
+  }
+
+  if (!body.cover.contactId && body.cover.contact) {
+    const newContact = {name: body.cover.contact}
+    const [contact, created] = await sequelize.models.contact.findOrCreate({where: newContact, defaults: newContact});
+    //const contact = await sequelize.models.contact.create(newContact);
+    //console.log(contact);
+    body.cover.contactId = contact.id;
+  }
+
+  if (!body.block.contactId && body.block.contact) {
+    const newContact = {name: body.block.contact}
+    const [contact, created] = await sequelize.models.contact.findOrCreate({where: newContact, defaults: newContact});
+    body.block.contactId = contact.id;
+  }
+}
+
+async function updatePrice(body) {
+  await updatePressPrice(body.cover);
+  await updatePressPrice(body.block);
+}
+
+async function updatePressPrice(press) {
+  let paper = await Paper.findByPk(press.paperId);
+  const cnt = (+press.count || 0) + (+press.countAdj || 0);
+  press.pricePaper = cnt * +paper.price;
+
+  const wp = await WorkPrice.findAll({
+    where: { color1: press.color1, color2: press.color2, 
+      [Op.or]: [{formatId: press.formatId}, {formatId: {[Op.is]: null}}], 
+      [Op.or]: [{countFrom: {[Op.lt]: cnt}}, {countFrom: {[Op.is]: null}}]
+    },
+    order: [['countFrom', 'DESC']],
+    //include: [{model: Equipment, where: {id: press.equipmentId, workId: sequelize.col('workPrices.workId')}}]
+    include: [
+      {association: WorkPrice.Work, required: true, include: [
+        {association: Work.Equipment, where: {id: press.equipmentId}}
+      ]}
+    ]
+  });
+  if (wp.length) {
+    let p = wp[0], p0 = {price: 0};
+    if (p.countFrom === null && wp.length > 1) {
+      p0 = p;
+      p = wp[1]
+    }
+    press.pricePress = +p0.price + (+p.price * cnt);
+  }
+
+//   data = await sequelize.query(`
+//   select *  from "workPrices" wp
+//     inner join "equipment" e on wp."workId" = e."workId"
+//     where e.id = '` + press.equipmentId + `'
+//       and wp."formatId" = '` + press.formatId + `'
+//     order by 1`
+// , { type: sequelize.QueryTypes.SELECT });
+}
+
+
 class OrderController {
   async getOrder(req, res, next){
     try {
@@ -70,66 +169,12 @@ class OrderController {
   //  return res.status(200).send({data: req.order});
   }
 
-  async createAssociations(body) {
-    console.log('createAssociations');
-    if (!body.division.id) {
-      // let division = await sequelize.models.division.create({name: body.division});
-      // body.divisionId = division.id;
-      const newDiv = {name: body.division}
-      const [division, created] = await sequelize.models.division.findOrCreate({where: newDiv, defaults: newDiv});
-      //console.log(division);
-      body.divisionId = division.id;
-    }
-
-    if (!body.subdivisionId && body.subdivision) {
-      const newSubDiv = {divisionId: body.divisionId, name: body.subdivision}
-      const [subdivision, created] = await sequelize.models.subdivision.findOrCreate({where: newSubDiv, defaults: newSubDiv});
-      //console.log(subdivision);
-      body.subdivisionId = subdivision.id;
-    }
-
-    if (!body.contactId && body.contact) {
-      const newContact = {
-        divisionId: body.subdivisionId || body.divisionId,
-        name: body.contact,
-        tel: body.contactTel || '',
-      }
-      //const [contact, created] = await sequelize.models.contact.findOrCreate({where: {divisionId: divisionId, name: body.contact.name}, defaults: body.contact});
-      const contact = await sequelize.models.contact.create(newContact);
-      //console.log(contact);
-      body.contactId = contact.id;
-    } else if (body.contactId && body.contact && body.contactTel !== body.contact.tel ) {
-      // Если надо обновим телефон
-      const tel = body.contactTel || '';
-      let up = await Contact.update(
-        {tel: tel},
-        //{where: {id: body.contactId, [Op.or]:[{tel: {[Op.ne]: tel}}, {tel: {[Op.is]: null}}]}}
-        {where: {id: body.contactId}}
-      );
-      console.log(up);
-    }
-
-    if (!body.cover.contactId && body.cover.contact) {
-      const newContact = {name: body.cover.contact}
-      const [contact, created] = await sequelize.models.contact.findOrCreate({where: newContact, defaults: newContact});
-      //const contact = await sequelize.models.contact.create(newContact);
-      //console.log(contact);
-      body.cover.contactId = contact.id;
-    }
-
-    if (!body.block.contactId && body.block.contact) {
-      const newContact = {name: body.block.contact}
-      const [contact, created] = await sequelize.models.contact.findOrCreate({where: newContact, defaults: newContact});
-      body.block.contactId = contact.id;
-    }
-  }
-
   async createOrder(req, res, next){
     try {
       console.log('createOrder');
       console.log(req.body);
 
-      await module.exports.createAssociations(req.body);
+      await createAssociations(req.body);
 
       let newOrder = await Order.create(req.body, { include: [{ association: Order.Cover }, { association: Order.Block }] });//
 
@@ -169,7 +214,8 @@ class OrderController {
       console.log('updateOrder');
       console.log(req.body);
 
-      await module.exports.createAssociations(req.body);
+      await createAssociations(req.body);
+      await updatePrice(req.body);
 
       await sequelize.models.order.update(req.body, { where: { id: req.body.id } });
       await OrderPress.update(req.body.cover, { where: { id: req.body.cover.id } });
