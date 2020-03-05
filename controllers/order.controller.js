@@ -78,14 +78,15 @@ async function createAssociations(body) {
 }
 
 async function updatePrice(body) {
-  await updatePressPrice(body.cover);
-  await updatePressPrice(body.block);
+  let priceCover = await updatePressPrice(body.cover);
+  let priceBlock = await updatePressPrice(body.block);
+  body.price = priceCover + priceBlock;
 }
 
 async function updatePressPrice(press) {
   let paper = await Paper.findByPk(press.paperId);
   const cnt = (+press.count || 0) + (+press.countAdj || 0);
-  press.pricePaper = cnt * +paper.price;
+  press.pricePaper = cnt * (paper && +paper.price);
 
   const wps = await WorkPrice.findAll({
     where: { color1: press.color1, color2: press.color2, 
@@ -116,12 +117,23 @@ async function updatePressPrice(press) {
   //   press.pricePress = +p0.price + (+p.price * cnt);
   // }
 
-  press.postPress.forEach(async pp => {
-    await updatePostPressPrice(pp, cnt);
-  });
+  let price = press.pricePress + press.pricePaper
+  // press.postPress && await press.postPress.forEach(async pp => {
+  // for (const pp of press.postPress) {
+  //   price += await updatePostPressPrice(pp, cnt);
+  // });
+  if (press.postPress) {
+    // делаем "map" массива в промисы
+    var upp = updatePostPressPrice.bind(undefined, cnt)
+    const promises = press.postPress.map(upp);
+    // ждем когда всё промисы будут выполнены
+    const res = await Promise.all(promises);
+    res.forEach(v => price += v)
+  }
+  return price;
 }
 
-async function updatePostPressPrice(pp, cnt) {
+async function updatePostPressPrice(cnt, pp) {
   const wps = await WorkPrice.findAll({
     where: {
       [Op.or]: [{color1: pp.color1}, {color1: {[Op.is]: null}}], 
@@ -139,7 +151,8 @@ async function updatePostPressPrice(pp, cnt) {
     if (!p0 && !wp.countFrom) {p0 = wp}
     if (!p && wp.countFrom) {p = wp}
   })
-  pp.price = (p0 ? +p0.price : 0) + ((p ? +p.price : 0) * cnt)
+  pp.price = (p0 ? +p0.price : 0) + ((p ? +p.price : 0) * cnt);
+  return pp.price;
 }
 
 class OrderController {
@@ -198,6 +211,7 @@ class OrderController {
       console.log(req.body);
 
       await createAssociations(req.body);
+      await updatePrice(req.body);
 
       let newOrder = await Order.create(req.body, { include: [{ association: Order.Cover }, { association: Order.Block }] });//
 
