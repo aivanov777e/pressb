@@ -16,8 +16,8 @@ async function getOrderById(id) {
   return await Order.findByPk(id, {
     include: [
       { all: true, nested: false },
-      { model: OrderPress, as: 'cover', include: [{ model: Contact}, { association: OrderPress.PostPress, include: [{ model: Contact}, { model: Work}]}]},
-      { association: Order.Block, include: [{ model: Contact}, { association: OrderPress.PostPress, include: [{ model: Contact}, { model: Work}]}]},
+      { model: OrderPress, as: 'cover', include: [{ all: true, nested: false }, { association: OrderPress.PostPress, include: [{ model: Contact}, { model: Work}]}]},
+      { association: Order.Block, include: [{ all: true, nested: false }, { association: OrderPress.PostPress, include: [{ model: Contact}, { model: Work}]}]},
       //{ association: Order.PostPress, include: [{ model: Contact}, { model: Work}]}
     ]    
   });

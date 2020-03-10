@@ -101,9 +101,9 @@ async function createTestData() {
     WorkPrice.create({workId: workOfs.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 1000, price: 3.30})
     WorkPrice.create({workId: workOfs.id, formatId: formatA2.id, color1: 1, color2: 1, countFrom: 2000, price: 2.21})
   //});
-  await Work.create({name: 'Цифровая печать', postPressTypeId: 0});
-  await Work.create({name: 'Широкоформатная печать', postPressTypeId: 0});
-  let workShg = await Work.create({name: 'Шелкография', postPressTypeId: 3});
+  const workZif = await Work.create({name: 'Цифровая печать', postPressTypeId: 0});
+  const workShF = await Work.create({name: 'Широкоформатная печать', postPressTypeId: 0});
+  const workShg = await Work.create({name: 'Шелкография', postPressTypeId: 3});
     WorkPrice.create({workId: workShg.id, color1: 1, color2: 0, countFrom: null, price: 350})
     WorkPrice.create({workId: workShg.id, color1: 1, color2: 0, countFrom: 1, price: 12.44})
     WorkPrice.create({workId: workShg.id, color1: 1, color2: 0, countFrom: 50, price: 10.71})
@@ -153,13 +153,13 @@ async function createTestData() {
 
   let equipmentRol = await sequelize.models.equipment.create({name: 'Роланд', workId: workOfs.id});
   let equipmentHam = await sequelize.models.equipment.create({name: 'Хамада', workId: workOfs.id});
-  let equipmentX75 = await sequelize.models.equipment.create({name: 'Xerox 75'});
-  let equipmentX700 = await sequelize.models.equipment.create({name: 'Xerox 700'});
-  let equipmentX7535 = await sequelize.models.equipment.create({name: 'Xerox 7535'});
-  let equipmentX95 = await sequelize.models.equipment.create({name: 'Xerox 95'});
-  let equipmentD550 = await sequelize.models.equipment.create({name: 'Duplo 550'});
-  let equipmentMim = await sequelize.models.equipment.create({name: 'Mimaki'});
-  let equipmentX6200 = await sequelize.models.equipment.create({name: 'Xerox 6200'});
+  let equipmentX75 = await sequelize.models.equipment.create({name: 'Xerox 75', workId: workZif.id});
+  let equipmentX700 = await sequelize.models.equipment.create({name: 'Xerox 700', workId: workZif.id});
+  let equipmentX7535 = await sequelize.models.equipment.create({name: 'Xerox 7535', workId: workZif.id});
+  let equipmentX95 = await sequelize.models.equipment.create({name: 'Xerox 95', workId: workZif.id});
+  let equipmentD550 = await sequelize.models.equipment.create({name: 'Duplo 550', workId: workZif.id});
+  let equipmentMim = await sequelize.models.equipment.create({name: 'Mimaki', workId: workShF.id});
+  let equipmentX6200 = await sequelize.models.equipment.create({name: 'Xerox 6200', workId: workShF.id});
   let equipmentSh = await sequelize.models.equipment.create({name: 'Шелкография', workId: workShg.id});
 
   // let color0 = await sequelize.models.color.create({name: '0'});
@@ -189,6 +189,8 @@ async function createTestData() {
   await sequelize.models.equipmentFormat.create({equipmentId: equipmentD550.id, formatId: formatA3.id});
   await sequelize.models.equipmentFormat.create({equipmentId: equipmentX7535.id, formatId: formatA3.id});
 
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentSh.id, formatId: formatA0.id});
+  await sequelize.models.equipmentFormat.create({equipmentId: equipmentSh.id, formatId: formatA1.id});
   await sequelize.models.equipmentFormat.create({equipmentId: equipmentSh.id, formatId: formatA2.id});
   await sequelize.models.equipmentFormat.create({equipmentId: equipmentSh.id, formatId: formatA3.id});
   await sequelize.models.equipmentFormat.create({equipmentId: equipmentSh.id, formatId: formatA4.id});
@@ -218,7 +220,7 @@ async function createTestData() {
       countOfItem: 10,
       sheetsInItem: 6,
       formatId: formatA5.id, width: 210, height: 148,
-      cover: {equipmentId: equipmentRol.id, formatId: formatA2.id, materialId: materialVHI.id, paperId: paperVHIA2180.id, color1: 1, color2: 0, count: 12,
+      cover: {equipmentId: equipmentRol.id, formatId: formatA2.id, materialId: materialVHI.id, paperId: paperVHIA2180.id, color1: 1, color2: 0, count: 12, contactId: contactIva.id,
         postPress: [
           {contactId: contactBol.id, workId: workLaP.id},
           {contactId: contactIva.id, workId: workShg.id, color1: 1, color2: 0}]},
