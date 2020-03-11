@@ -282,5 +282,3 @@ OrderPress.belongsTo(Paper, {foreignKey: 'paperId', sourceKey: 'id'});
 OrderPostPress.belongsTo(Contact, {foreignKey: 'contactId', sourceKey: 'id'});
 OrderPostPress.belongsTo(Work, {foreignKey: 'workId', sourceKey: 'id'});
 
-require('./db.service.data');
-

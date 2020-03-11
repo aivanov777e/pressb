@@ -37,3 +37,4 @@ sequelize.authenticate()
 module.exports = sequelize;
 
 require('../services/db.service.models');
+require('./db.service.data');

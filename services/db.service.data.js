@@ -10,13 +10,15 @@ const WorkPrice = sequelize.models.workPrice
 const PostPressType = sequelize.models.postPressType
 const Format = sequelize.models.format
 
-sequelize.sync({ force: true }).then(result=>{
-  console.log(result);  
-
-  createTestData();
-
-  })
-.catch(err=> console.log(err));  
+if (process.env['RECREATE_DB'] === '1') {
+  sequelize.sync({ force: true }).then(async result => {
+    //console.log(result);  
+    await createTestData();
+    console.log('RECREATE_DB=' + process.env['RECREATE_DB']);
+    console.log('RECREATED DB');
+    })
+  .catch(err=> console.log(err));  
+}
 
 
 async function createTestData() {

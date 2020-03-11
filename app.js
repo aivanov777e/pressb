@@ -24,6 +24,9 @@ app.use('/pressb/api', routes);
 app.get('/debug-sentry', function mainHandler(req, res) {
   throw new Error('My first Sentry error!');
 });
+app.get('/test', function mainHandler(req, res) {
+  return res.status(200).send('test ok');
+});
 
 // The error handler must be before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());

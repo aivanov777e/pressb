@@ -32,3 +32,13 @@ psql -d template1 -U ".\postgres"
 psql -U postgres
 # CREATE DATABASE press;
 
+git push origin master
+
+npm i -g heroku
+heroku local
+heroku ps:scale web=0
+heroku logs --tail
+git push heroku master
+heroku open
+heroku config
+heroku config:set RECREATE_DB=1
