@@ -4,10 +4,10 @@ console.log('db.service')
 
 // const sequelize = new Sequelize('press', 'postgres', ',bkfqy1', {
 const config =  {
-    username: 'press_pg',
-    password: ',bkfqy1', // Для sqlite пароль не обязателен
-    database: 'press_pg', // Имя базы данных
-    host: '127.0.0.1', // Адрес субд, для sqlite всегда локалхост
+    // username: 'press_pg',
+    // password: ',bkfqy1', // Для sqlite пароль не обязателен
+    // database: 'press_pg', // Имя базы данных
+    // host: '127.0.0.1', // Адрес субд, для sqlite всегда локалхост
       
     dialect: 'postgres',
     pool: {
@@ -26,7 +26,9 @@ const config =  {
     //operatorsAliases: Sequelize.Op // Передаём алиасы параметров (дальше покажу нафига)  
     //operatorsAliases: false
 };
-const sequelize = new Sequelize(config);
+//const sequelize = new Sequelize(config);
+console.log(process.env.DATABASE_URL)
+const sequelize = new Sequelize(process.env.DATABASE_URL, config);
 
 sequelize.authenticate()
     .then(() => console.log('Connected postgres.'))
