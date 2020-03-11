@@ -12,8 +12,8 @@ app.use(Sentry.Handlers.requestHandler({
   transaction: 'handler'
 }));
 
-const host = '127.0.0.1';
-const port = 7000;
+const HOST = '127.0.0.1';
+const PORT = 7000;
 Error.stackTraceLimit = 30; 
 
 app.use(bodyParser.json());
@@ -49,4 +49,10 @@ app.use(function onError(err, req, res, next) {
   res.status(500).send({message: `${err.message}`});
 });  
 
-app.listen(port, host, () => console.log(`Server listens http://${host}:${port}`));
+// Initialize the app.
+//app.listen(port, host, () => console.log(`Server listens http://${host}:${port}`));
+var server = app.listen(process.env.PORT || PORT, function () {
+  var port = server.address().port;
+  console.log("App now running on port", port);
+});
+

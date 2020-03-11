@@ -36,7 +36,7 @@ git push origin master
 
 npm i -g heroku
 heroku local
-heroku ps:scale web=0
+heroku ps:scale web=0 // heroku ps:scale web=1
 heroku logs --tail
 git push heroku master
 heroku open
