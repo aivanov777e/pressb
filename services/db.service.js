@@ -30,12 +30,11 @@ const config =  {
 console.log(process.env.DATABASE_URL)
 const sequelize = new Sequelize(process.env.DATABASE_URL, config);
 
-sequelize.authenticate()
-    .then(() => console.log('Connected postgres.'))
-    .catch(err => {
-        console.error('Connection postgres error: ', err);
-        
-    });
+// sequelize.authenticate()
+//     .then(() => console.log('Connected postgres.'))
+//     .catch(err => {
+//         console.error('Connection postgres error: ', err);        
+//     });
     
 module.exports = sequelize;
 

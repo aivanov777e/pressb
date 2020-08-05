@@ -1,6 +1,9 @@
 # pressb
-net user postgres ,bkfqy1 /add
 choco install postgresql --params '/Password:,bkfqy1' --params-global
+CREATE ROLE press_pg PASSWORD ',bkfqy1' LOGIN SUPERUSER
+CREATE DATABASE press_pg
+
+net user postgres ,bkfqy1 /add
 initdb.exe -D "c:\pg_press" --locale=Russian_Russia --encoding=UTF8 -U postgres -W
 pg_ctl register -D "c:\pg_press" -N PostgreSQL -U postgres -P ",bkfqy1" -S a
 net start PostgreSQL
@@ -34,11 +37,15 @@ psql -U postgres
 
 git push origin master
 
+git remote add heroku https://git.heroku.com/pressb.git 
 npm i -g heroku
 heroku local
 heroku ps:scale web=0 // heroku ps:scale web=1
 heroku logs --tail
 git push heroku master
 heroku open
-heroku config
+heroku config -a pressb
 heroku config:set RECREATE_DB=1
+
+issues:
+https://stackoverflow.com/questions/61663848/sequelize-authenticate-do-not-working-no-success-or-error-response-for-googl

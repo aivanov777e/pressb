@@ -10,18 +10,22 @@ const WorkPrice = sequelize.models.workPrice
 const PostPressType = sequelize.models.postPressType
 const Format = sequelize.models.format
 
+console.log('db.service.data')
+console.log('RECREATE_DB=' + process.env['RECREATE_DB']);
 if (process.env['RECREATE_DB'] === '1') {
-  sequelize.sync({ force: true }).then(async result => {
+  console.log('db.service.data RECREATEING DATA')
+  sequelize.sync({ force: true, logging: console.log })
+  .then(async result => {
     //console.log(result);  
     await createTestData();
-    console.log('RECREATE_DB=' + process.env['RECREATE_DB']);
     console.log('RECREATED DB');
     })
-  .catch(err=> console.log(err));  
+  .catch(err => console.log(err));  
 }
 
 
 async function createTestData() {
+  console.log('db.service.data createTestData()')
 
   const contactIva = await Contact.create({name: 'Иванова Е.В.'});
   const contactBol = await Contact.create({name: 'Болотина А.Н.'});
