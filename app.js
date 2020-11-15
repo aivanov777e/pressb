@@ -51,7 +51,14 @@ app.use(function onError(err, req, res, next) {
   // and optionally displayed to the user for support.
   //res.statusCode = 500;
   //res.end(res.sentry + "\n");
-  res.status(500).send({message: `${err.message}`});
+  if (res.headersSent) {
+    return next(err);
+  }
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).send('invalid token...');
+  } else {
+    res.status(500).send({message: `${err.message}`});
+  }
 });  
 
 // Initialize the app.

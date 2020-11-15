@@ -1,0 +1,27 @@
+GET  http://127.0.0.1:7000/test
+
+###
+
+POST http://127.0.0.1:7000/pressb/api/user/signup
+content-type: application/json
+
+{
+  "user": {
+    "name": "admin",
+    "password": "Cytu33",
+    "email": ""
+  }
+}
+
+###
+
+POST http://127.0.0.1:7000/pressb/api/user/login
+content-type: application/json
+
+{
+  "user": {
+    "name": "admin",
+    "password": "Cytu33"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNDRjMDE4MTAtMTUwZC0xMWViLWE0NzMtZDFiMjE0NjMxN2MyIiwibmFtZSI6ImFkbWluIiwiZW1haWwiOiIifSwiaWF0IjoxNjAzNDQzMjI5LCJleHAiOjE2MDM0NjQ4Mjl9.A0n7rV-e4aiI-vMDKJ_25WcJEaBv5G3TP70YHA5E5k4"
+}

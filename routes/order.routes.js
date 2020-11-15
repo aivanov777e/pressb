@@ -1,6 +1,6 @@
 const express = require("express"),
     router = express.Router(),
-    orderController = require('../controllers/order.controller')
+    orderController = require('../controllers/order.controller');
     //OrderService = require('../services/order.service');
 
 router.use(async (req, res, next) => {

@@ -1,6 +1,29 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('./db.service');
 
+let User = sequelize.define('user', {
+  id: {
+    primaryKey: true,
+    allowNull: false,
+    type: DataTypes.UUID,
+    defaultValue: Sequelize.UUIDV1
+  },
+  name: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  email: Sequelize.STRING,
+  password: {
+    type: Sequelize.STRING,
+    required: true,
+  },
+  salt: {
+    type: Sequelize.STRING,
+    required: true,
+  },
+},{});
+
 let Contact = sequelize.define('contact', {
   id: {
     primaryKey: true,
