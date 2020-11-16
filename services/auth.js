@@ -50,6 +50,9 @@ class AuthService {
   // }
 
   async SignUp(name, password, email) {
+
+    throw new Error('SignUp disabled!')
+
     const salt = crypto.randomBytes(32);
     //const passwordHashed = await argon2.hash(password, { salt });
     const passwordHashed = await argon2.hash(password);

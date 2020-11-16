@@ -1,5 +1,6 @@
 //const Sequelize = require('sequelize');
 const sequelize = require('./db.service');
+const User = sequelize.models.user
 const Order = sequelize.models.order
 const OrderPress = sequelize.models.orderPress
 const Contact = sequelize.models.contact
@@ -26,6 +27,30 @@ if (process.env['RECREATE_DB'] === '1') {
 
 async function createTestData() {
   console.log('db.service.data createTestData()')
+
+  await User.create({
+    id: '44c01810-150d-11eb-a473-d1b2146317c2',
+    password: '$argon2i$v=19$m=4096,t=3,p=1$cBTJXfPoAzuYwnQCUl+3iHwnYdIp9D9Nz3Qp+SNm0D8$kp7cXLVdKQgR5AD8Ro3m15TJnnUAFmaVcSM1J1viOdI',
+    email: '',
+    salt: '7014c95df3e8033b98c27402525fb7887c2761d229f43f4dcf7429f92366d03f',
+    name: 'admin'
+  });
+
+  await User.create({
+    id: '757821f0-27a0-11eb-b707-c377cc42cda9',
+    password: '$argon2i$v=19$m=4096,t=3,p=1$9mEuo3L4ZEws2MQ70yhrFA$6RtRNZVUBXD55pOqzGtndT8MC0NYBpZ663iExLra4kU',
+    email: '',
+    salt: '61b01f6d50ec4ca39528d8f35262b6f4cc2b224c038573414abc11077069e75b',
+    name: 'nata'
+  });
+
+  await User.create({
+    id: '5ac62dc0-27a0-11eb-b707-c377cc42cda9',
+    password: '$argon2i$v=19$m=4096,t=3,p=1$JAuNz9+Ls2eXeqlhIm+HZw$n/RnNS0KVpaiIyfOqREcTYWajNzYlwbzlbFAx4fgVhc',
+    email: '',
+    salt: 'eddf5468b65cc7b690256ab7f938e83dff2538b1d036a74d3b0b63ff7ddb562b',
+    name: 'dima'
+  });
 
   const contactIva = await Contact.create({name: 'Иванова Е.В.'});
   const contactBol = await Contact.create({name: 'Болотина А.Н.'});
