@@ -215,6 +215,19 @@ class OrderController {
 
       let newOrder = await Order.create(req.body, { include: [{ association: Order.Cover }, { association: Order.Block }] });//
 
+      let cpp = req.body.cover.postPress || [];
+      let bpp = req.body.block.postPress || [];
+      cpp.forEach((val) => val.orderPressId = newOrder.coverId);
+      bpp.forEach((val) => val.orderPressId = newOrder.blockId);
+      const pp = cpp.concat(bpp);
+      console.log(pp);
+
+      //const ppiu = pp.filter(v => v.crud === 'i' || v.crud === 'u');
+      const ppiu = pp.filter(v => v.crud !== 'd');
+      if (ppiu.length) {
+        await OrderPostPress.bulkCreate(ppiu, {updateOnDuplicate: ['option', 'price', 'contactId', 'workId']});
+      }
+
       //let data = await sequelize.models.order.findByPk(newOrder.id, {include: [{ all: true, nested: false }]});
       // let data = await sequelize.models.order.findByPk(newOrder.id, {
       //   include: [
